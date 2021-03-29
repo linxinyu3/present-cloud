@@ -7,6 +7,8 @@ import home from '../views/home/index.vue'
 import information from '../views/information/index.vue'
 import layout from '../layout/layout.vue' 
 import pageone from '../views/pageone/index.vue'
+import schoolManage from '../views/schoolManage/index.vue'
+import form from '../views/form/index.vue'
 Vue.use(Router)
 
 export const router = new Router({
@@ -35,7 +37,6 @@ export const router = new Router({
       redirect: '/information',
       name: 'information',
       isShow: true,
-
       children: [{
         path: 'information',
         component: information,
@@ -68,6 +69,27 @@ export const router = new Router({
         },
         
       ]
+    },
+    {
+      path: '/',
+      name: 'form',
+      redirect: '/form',
+      component: layout,
+      alwaysShow: true,
+      meta: {
+        title: 'form',
+        icon: 'el-icon-tickets',
+        roles: ['admin', 'editor'] // you can set roles in root nav
+      },
+      children: [{
+        path: '/form',
+        component: form,
+        name: 'form',
+        meta: {
+          title: '基础表单模板',
+          roles: ['admin', 'editor'] // you can set roles in root nav
+        },
+      }]
     },
     {
       path: '/',

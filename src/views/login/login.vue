@@ -203,6 +203,10 @@ export default {
           if (valid) {
             this.loading = true;
            //存储登录信息
+          this.$axios.get('/hello').then(res=>{
+            console.log(res);
+            alert(res.data)
+          })
            localStorage.setItem("UserAccount", this.loginForm.username);
             var data = {
               email: this.loginForm.username,
