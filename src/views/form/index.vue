@@ -208,6 +208,18 @@ export default {
         sex : "1",
         email : "123@qq.com",
         state : "0"
+      },
+      {
+        name : "李四",
+        sex : "1",
+        email : "1234@qq.com",
+        state : "0"
+      },
+      {
+        name : "王五",
+        sex : "0",
+        email : "12345@qq.com",
+        state : "0"
       }]
       this.totalNum = 1;
       this.listLoading = true;
@@ -277,7 +289,7 @@ export default {
         this.ruleForm.sex = this.ruleForm.sex.toString();
         this.title = "修改用户信息";
         this.dialogFormVisible = true;
-      } 
+      },
     },
 };
 </script>
@@ -301,7 +313,7 @@ export default {
 }
 .form-style {
   background: #fff;
-  padding: 20px;
+
   min-height: 85vh;
 }
 </style>

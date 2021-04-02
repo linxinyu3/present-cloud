@@ -27,7 +27,7 @@
             type="text"
             v-model="loginForm.username"
             autocomplete="on"
-            placeholder="请输入手机号/邮箱"
+            placeholder="请输入手机号/用户名"
           ></el-input>
         </el-form-item>
 
@@ -72,13 +72,13 @@
             placeholder="请输入手机号"
           ></el-input>
         </el-form-item>
-        <el-form-item prop="message">
+        <el-form-item prop="validCode">
           <el-row>
             <el-col :span="15">
               <el-input
                 prefix-icon="el-icon-message"
                 name="password"
-                v-model="loginForm1.message"
+                v-model="loginForm1.validCode"
                 autocomplete="on"
                 placeholder="请输入验证码"
               />
@@ -88,7 +88,7 @@
                 type="primary"
                 plain
                 :disabled="isDisabled"
-                @click="getMessage()"
+                @click="getValidCode()"
                 id="dyMobileButton"
               >{{butName}}</el-button>
             </el-col>
@@ -118,7 +118,7 @@ export default {
       },
       loginForm1: {
         username: "",
-        message: ""
+        validCode: ""
       },
       loginRules: {
         username: [{ required: true, trigger: "blur", message: "请输入手机号/邮箱" }],
@@ -138,7 +138,7 @@ export default {
             trigger: ["blur"]
           }
         ],
-        message: [{ required: true, trigger: "blur", message: "请输入验证码" }]
+        validCode: [{ required: true, trigger: "blur", message: "请输入验证码" }]
       },
       passwordType: "password",
       loading: false,
@@ -157,7 +157,6 @@ export default {
       var isLogin = JSON.parse(localStorage.getItem("isLogin")); //获取缓存看是否登录过
       var time = localStorage.getItem("loginTime");
       var nowTime = new Date().getTime();
-      // let token = localStorage.getItem("Authorization");
       if (
         isLogin === true &&
         nowTime <= time + 86400000
@@ -165,7 +164,7 @@ export default {
         this.$router.push("/home");
       }
     },
-    getMessage() {
+    getValidCode() {
       var time = 60;
       this.$refs.loginForm1.validateField("username", errMsg => {
         if (errMsg) {
@@ -202,37 +201,58 @@ export default {
         this.$refs.loginForm.validate(valid => {
           if (valid) {
             this.loading = true;
-           //存储登录信息
-          this.$axios.get('/hello').then(res=>{
-            console.log(res);
-            alert(res.data)
-          })
-           localStorage.setItem("UserAccount", this.loginForm.username);
             var data = {
-              email: this.loginForm.username,
-              password: this.loginForm.password
+              usernameOrPhone: this.loginForm.username,
+              password: this.loginForm.password,
             };
-            this.$router.push("/home");
+            this.$axios.post('/loginByPassword',data).then(res=>{  
+              console.log(res);    
+              if(res.data.code == "200"){
+                console.log(res.data);  
+                this.loading = false;
+                var date = new Date();
+                //存储登录信息
+                localStorage.setItem("account", this.loginForm.username);
+                localStorage.setItem("loginTime", date.getTime()); //登录时间
+                localStorage.setItem("Authorization", res.data.obj.token);
+                localStorage.setItem("isLogin", true);
+                this.$router.push("/home");              
+                }else{
+                  this.loading = false;
+                  this.$alert(res.data.respCode, "登录失败", {
+                    confirmButtonText: "确定"
+                  });
+                }
+            })
           }
         });
       } else {
         //验证码登录
         this.$refs.loginForm1.validate(valid => {
           if (valid) {
-            if (
-              localStorage.getItem("validateCode") != this.loginForm1.message
-            ) {
-              this.$alert("验证码错误，请重新输入", "登录失败", {
-                confirmButtonText: "确定"
-              });
-            } else {
-              localStorage.setItem("UserAccount", this.loginForm1.username);
-              this.loading = true;
-              var data = {
-                email: this.loginForm1.username
-              };
-              this.$router.push("/home");
+            var data = {
+              usernameOrPhone : 'this.loginForm1.username1',
+              code: this.loginForm1.validCode
             }
+            this.loading = true; 
+            this.$axios.post('/loginByCode',data).then(res=>{
+              console.log(res.data)
+              if (res.data.code == "200") {
+                this.loading = false;
+                console.log(res.data)
+                var date = new Date();
+                //存储登录信息
+                localStorage.setItem("account", this.loginForm1.username);
+                localStorage.setItem("loginTime", date.getTime()); //登录时间
+                localStorage.setItem("Authorization", res.data.obj.token);
+                localStorage.setItem("isLogin", true);
+                this.$router.push("/home");       
+              } else {
+                this.$alert("验证码错误，请重新输入", "登录失败", {
+                confirmButtonText: "确定"
+                });
+              }            
+            })
           }
         });
       }

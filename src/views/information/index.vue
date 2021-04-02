@@ -1,3 +1,3 @@
 <template>
-  <div>个人信息</div>
+  <div style="height:100%">个人信息</div>
 </template>

@@ -1,6 +1,6 @@
 <template>
-  <div >
-  <el-container style="height:100% ">
+  <div style="padding:0;height:100%" >
+  <el-container style="height:100%">
     <el-aside width="200px" >
       <sidebar></sidebar>
     </el-aside>
@@ -27,11 +27,19 @@ export default {
   },
 }
 </script>
-<style >
-   .el-aside {
-        /* background-color:#545c64; */
-        color: #333;
-        text-align: left;
-        line-height: 100vh;
+<style>
+
+.el-aside {
+    background-color:#304156;
+    color: #333;
+    text-align: left;
+    line-height: 100vh;
+ }
+ .sidebar{
+   top: 0;
+   left: 0;
+   bottom: 0;
+   height: 100%;
+   position: fixed;
  }
 </style>
