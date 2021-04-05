@@ -214,7 +214,7 @@ export default {
                 //存储登录信息
                 localStorage.setItem("account", this.loginForm.username);
                 localStorage.setItem("loginTime", date.getTime()); //登录时间
-                localStorage.setItem("Authorization", res.data.obj.token);
+                localStorage.setItem("Authorization", res.data.obj.tokenHead + res.data.obj.token);
                 localStorage.setItem("isLogin", true);
                 this.$router.push("/home");              
                 }else{
@@ -244,7 +244,7 @@ export default {
                 //存储登录信息
                 localStorage.setItem("account", this.loginForm1.username);
                 localStorage.setItem("loginTime", date.getTime()); //登录时间
-                localStorage.setItem("Authorization", res.data.obj.token);
+                localStorage.setItem("Authorization", res.data.obj.tokenHead + res.data.obj.token);
                 localStorage.setItem("isLogin", true);
                 this.$router.push("/home");       
               } else {

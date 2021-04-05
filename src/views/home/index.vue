@@ -1,3 +1,23 @@
 <template>
-  <div>主页</div>
+  <div>home</div>
 </template>
+
+<script>
+import qs from "qs";
+export default {
+  created() {
+    this.$axios.get('/menu/currentUser').then(res=>{
+      var data = res.data[0]
+      localStorage.setItem('menuList', JSON.stringify(data))
+    })
+  },
+  data() {
+    return {
+    }
+  }
+}
+</script>
+
+<style rel="stylesheet/scss" lang="scss" scoped>
+
+</style>
