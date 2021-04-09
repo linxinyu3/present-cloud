@@ -7,6 +7,9 @@ import home from '../views/home/index.vue'
 import information from '../views/information/index.vue'
 import layout from '../layout/layout.vue' 
 import form from '../views/form/index.vue'
+import errorpage403 from '../views/errorPage/403.vue'
+import errorpage404 from '../views/errorPage/404.vue'
+import errorpage500 from '../views/errorPage/500.vue'
 
 Vue.use(Router)
 
@@ -41,7 +44,7 @@ export const router = new Router({
         title: '主页',
         icon: 'el-icon-s-home',
         roles: ['admin', 'editor'], // you can set roles in root nav
-        requireAuth: true
+        // requireAuth: true
       },
       children: [
         {
@@ -52,7 +55,7 @@ export const router = new Router({
             title: '主页',
             icon: 'el-icon-s-home',
             roles: ['admin'], // or you can only set roles in sub nav
-            requireAuth: true
+            // requireAuth: true
           }
         },
       ]
@@ -109,19 +112,19 @@ export const router = new Router({
       children: [
         {
           path: '403',
-          component: () => import('../views/errorPage/403'),
+          component: errorpage403,
           name: 'Page403',
           meta: { title: '403', noCache: true }
         },
         {
           path: '404',
-          component: () => import('../views/errorPage/404'),
+          component: errorpage404,
           name: 'Page404',
           meta: { title: '404', noCache: true }
         },
         {
           path: '500',
-          component: () => import('../views/errorPage/500'),
+          component: errorpage500,
           name: 'Page500',
           meta: { title: '500', noCache: true }
         },
@@ -129,12 +132,16 @@ export const router = new Router({
     },
   ]
 })
-
+var flag = true
 router.beforeEach((to, from, next) => {
-  if (to.meta.requireAuth) {  // 判断该路由是否需要登录权限
+  // if (to.meta.requireAuth) {  // 判断该路由是否需要登录权限
     if (localStorage.Authorization) {  // 获取当前的token是否存在
-      console.log("token存在");
-      routerGo();
+      // console.log("token存在");
+      menuListInit();
+      if(flag){
+        flag = false;
+        routerGo();
+      }
       next();
     } else {
       console.log("token不存在");
@@ -143,27 +150,43 @@ router.beforeEach((to, from, next) => {
         query: {redirect: to.fullPath}
       })
     }
-  }
-  else { // 如果不需要权限校验，直接进入路由界面
-    next();
-  }
+  // }
+  // else { // 如果不需要权限校验，直接进入路由界面
+  //   next();
+  // }
 });
 
+function menuListInit(){
+  var data = [{
+    icon: '',
+    name: '',
+    roles: '',
+    url: '',
+    children: [{
+      name: '',
+      url: ''
+    }, {
+      name: '',
+      url: ''
+    }]
+  }]
+  if (localStorage.getItem('menuList') == null || localStorage.getItem('menuList') == undefined) {
+    localStorage.setItem('menuList', JSON.stringify(data))
+  }
+}
+
 function routerGo() {
-  
   var menuList = JSON.parse(localStorage.getItem('menuList'));
   menuList =  menuList.children
-  console.log(menuList[0])
   if (menuList != null) {
     for (var i = 0; i < menuList.length; i++) {
       // 创建路由配置
-      const url = menuList[i].url
+      const Component = menuList[i].component
       var route = {
         path: '/',
         component: layout,
         redirect: '',
         name: menuList[i].name,
-        
         meta: {
           title: menuList[i].name,
           icon: menuList[i].iconCls,
@@ -171,7 +194,8 @@ function routerGo() {
         },
         children: [{
           path: menuList[i].path,
-          component: () => import ('../views/' + menuList[i].component),
+          component: () =>
+                        import('../views/' + Component + '/index.vue'),
           name: menuList[i].name,
           meta: {
             title: menuList[i].name,
@@ -180,10 +204,10 @@ function routerGo() {
           },
         }]
       }
+      console.log('重新加入')
       router.options.routes.push(route)
     }
   }
   router.addRoutes(router.options.routes)
 }
-
 export default router
