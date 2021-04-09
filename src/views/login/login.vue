@@ -205,23 +205,22 @@ export default {
               usernameOrPhone: this.loginForm.username,
               password: this.loginForm.password,
             };
-            this.$axios.post('/loginByPassword',data).then(res=>{  
+            this.$axios.post('/manage/loginByPassword',data).then(res=>{  
               console.log(res);    
-              if(res.data.code == "200"){
-                console.log(res.data);  
+              if(res){
+                console.log(res);  
                 this.loading = false;
                 var date = new Date();
                 //存储登录信息
                 localStorage.setItem("account", this.loginForm.username);
                 localStorage.setItem("loginTime", date.getTime()); //登录时间
-                localStorage.setItem("Authorization", res.data.obj.tokenHead + res.data.obj.token);
+                localStorage.setItem("Authorization", res.obj.tokenHead + res.obj.token);
                 localStorage.setItem("isLogin", true);
-                this.$router.push("/home");              
-                }else{
-                  this.loading = false;
-                  this.$alert(res.data.respCode, "登录失败", {
-                    confirmButtonText: "确定"
-                  });
+                this.$router.push("/home");    
+                this.$axios.get('/menu/manage/currentUser').then(res=>{
+                  var data = res[0]
+                  localStorage.setItem('menuList', JSON.stringify(data))
+                })
                 }
             })
           }
@@ -235,16 +234,16 @@ export default {
               code: this.loginForm1.validCode
             }
             this.loading = true; 
-            this.$axios.post('/loginByCode',data).then(res=>{
-              console.log(res.data)
-              if (res.data.code == "200") {
+            this.$axios.post('/manage/loginByCode',data).then(res=>{
+              console.log(res)
+              if (res.code == "200") {
                 this.loading = false;
-                console.log(res.data)
+                console.log(res)
                 var date = new Date();
                 //存储登录信息
                 localStorage.setItem("account", this.loginForm1.username);
                 localStorage.setItem("loginTime", date.getTime()); //登录时间
-                localStorage.setItem("Authorization", res.data.obj.tokenHead + res.data.obj.token);
+                localStorage.setItem("Authorization", res.obj.tokenHead + res.obj.token);
                 localStorage.setItem("isLogin", true);
                 this.$router.push("/home");       
               } else {
