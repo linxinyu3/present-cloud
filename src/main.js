@@ -5,7 +5,7 @@ import App from './App'
 import router from './router'
 import store from './store'
 import ElementUI from 'element-ui'
-import Message from 'element-ui'
+import {Message} from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import './css/all.css'
 import './icons'
@@ -53,10 +53,12 @@ axios.interceptors.response.use(
     return success.data
   },
   (error) => {
-    if (error.response.statusCode == 504 || error.response.statusCode == 404) {
+    if (error.response.statusCode == 404) {
       Message.error({ message: '服务器被吃了o(╯□╰)o' })
+      this.$router.push('/error/404')
     } else if (error.response.statusCode == 403) {
       Message.error({ message: '权限不足，请联系管理员' })
+      this.$router.push('/error/403')
     } else if (error.response.statusCode == 401) {
       Message.error({ message: '尚未登录，请登录' })
       localStorage.removeItem('Authorization');
