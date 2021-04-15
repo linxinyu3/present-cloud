@@ -10,13 +10,12 @@ import form from '../views/form/index.vue'
 import errorpage403 from '../views/errorPage/403.vue'
 import errorpage404 from '../views/errorPage/404.vue'
 import errorpage500 from '../views/errorPage/500.vue'
-import axios from 'axios'
+
 Vue.use(Router)
 
 export const router = new Router({
   // mode:'history',
   routes: [
-    { path: '/', redirect: '/login', hidden: true },
     {
       path: '/login',
       name: 'login',
@@ -135,48 +134,48 @@ export const router = new Router({
 })
 var flag = true
 router.beforeEach((to, from, next) => {
-  if(to.path == '/login' || to.path == '/signup' || to.path == '/forgetPassword'){
-    next();
-    return;
-  }
-  if(flag){
-    flag = false;
-    routerGo();
-    next(to.path);
-  }
-  else{
-    next();
-  }
+  // if (to.meta.requireAuth) {  // 判断该路由是否需要登录权限
+    if (localStorage.Authorization) {  // 获取当前的token是否存在
+      // console.log("token存在");
+      menuListInit();
+      if(flag){
+        flag = false;
+        routerGo();
+      }
+      next();
+    } else {
+      console.log("token不存在");
+      next({
+        path: '/login', // 将跳转的路由path作为参数，登录成功后跳转到该路由
+        query: {redirect: to.fullPath}
+      })
+    }
+  // }
+  // else { // 如果不需要权限校验，直接进入路由界面
+  //   next();
+  // }
 });
 
 function menuListInit(){
-    //初始化菜单
-    var data = [{
-      icon: '',
+  var data = [{
+    icon: '',
+    name: '',
+    roles: '',
+    url: '',
+    children: [{
       name: '',
-      roles: '',
-      url: '',
-      children: [{
-        name: '',
-        url: ''
-      }, {
-        name: '',
-        url: ''
-      }]
+      url: ''
+    }, {
+      name: '',
+      url: ''
     }]
-    if (localStorage.getItem('menuList') == null || localStorage.getItem('menuList') == undefined) {
-      localStorage.setItem('menuList', JSON.stringify(data))
-    }
+  }]
+  if (localStorage.getItem('menuList') == null || localStorage.getItem('menuList') == undefined) {
+    localStorage.setItem('menuList', JSON.stringify(data))
+  }
 }
 
 function routerGo() {
-  menuListInit();
-  axios.get('/menu/currentUser').then(res=>{
-    if(res){
-      var data = res[0];
-      localStorage.setItem('menuList', JSON.stringify(data));
-    }
-  })    
   var menuList = JSON.parse(localStorage.getItem('menuList'));
   menuList =  menuList.children
   if (menuList != null) {
@@ -210,6 +209,5 @@ function routerGo() {
     }
   }
   router.addRoutes(router.options.routes)
-  console.log(router.options.routes)
 }
 export default router
