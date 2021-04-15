@@ -216,11 +216,12 @@ export default {
                 localStorage.setItem("loginTime", date.getTime()); //登录时间
                 localStorage.setItem("Authorization", res.obj.tokenHead + res.obj.token);
                 localStorage.setItem("isLogin", true);
-                this.$router.push("/home");    
-                this.$axios.get('/menu/manage/currentUser').then(res=>{
+                this.$axios.get('/menu/currentUser').then(res=>{
                   var data = res[0]
                   localStorage.setItem('menuList', JSON.stringify(data))
-                })
+                  this.$router.push("/home");
+                })    
+                
                 }
             })
           }
@@ -230,13 +231,13 @@ export default {
         this.$refs.loginForm1.validate(valid => {
           if (valid) {
             var data = {
-              usernameOrPhone : 'this.loginForm1.username1',
+              usernameOrPhone : this.loginForm1.username,
               code: this.loginForm1.validCode
             }
             this.loading = true; 
             this.$axios.post('/manage/loginByCode',data).then(res=>{
               console.log(res)
-              if (res.code == "200") {
+              if (res) {
                 this.loading = false;
                 console.log(res)
                 var date = new Date();
@@ -245,7 +246,11 @@ export default {
                 localStorage.setItem("loginTime", date.getTime()); //登录时间
                 localStorage.setItem("Authorization", res.obj.tokenHead + res.obj.token);
                 localStorage.setItem("isLogin", true);
-                this.$router.push("/home");       
+                this.$axios.get('/menu/currentUser').then(res=>{
+                  var data = res[0]
+                  localStorage.setItem('menuList', JSON.stringify(data))
+                })    
+                this.$router.push("/home");     
               } else {
                 this.$alert("验证码错误，请重新输入", "登录失败", {
                 confirmButtonText: "确定"

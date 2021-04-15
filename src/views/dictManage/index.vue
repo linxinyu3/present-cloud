@@ -30,7 +30,6 @@
         ref="multipleTable"
         tooltip-effect="dark"
         style="width: 100%"
-        @selection-change="handleSelectionChange"
         :header-cell-style="{background:'#eef1f6',color:'#606266'}"
       >
         <el-table-column type="selection" width="50"></el-table-column>
@@ -339,8 +338,8 @@ export default {
       this.totalNum = 1;
       this.listLoading = true;
       this.page = page;
-      this.$axios.get('/dict/manage/').then(res =>{
-        console.log(res);
+      this.$axios.get('/dict/manage/?currentPage=' + this.page).then(res =>{
+        // console.log(res.data)
         this.list = res.data;
         //获取用户信息
         var data = {
@@ -379,7 +378,6 @@ export default {
       console.log(typeof(this.itemForm.isDefault))
       this.dialogFormVisible2 = true;
       // this.title = "新增数据项";
-
     },
     editItem(row) {
       //修改数据项
@@ -393,6 +391,7 @@ export default {
       this.index = row.index;
       this.edit = true;
       this.listLoading = false;
+      
     },
     deleteItem(row) {
       this.row = row;
@@ -459,6 +458,10 @@ export default {
             //修改字典
             console.log(this.tempList.dictInfoList)
             this.tempList.dict = this.ruleForm;
+            for(var i in this.tempList.dictInfoList){
+              this.tempList.dictInfoList[i].tag = this.tempList.dict.tag
+            }
+            console.log(this.tempList);
             this.$axios.put('/dict/manage/',this.tempList).then(res=>{
               if(res){
                 console.log(res)
@@ -513,7 +516,6 @@ export default {
           this.dialogFormVisible2 = false;   
         }
       });
-      console.log(this.tempList);
     },
     resetForm(formName) {
       this.dialogFormVisible = false;
