@@ -26,7 +26,6 @@
         highlight-current-row
         tooltip-effect="dark"
         style="width: 100%"
-        @selection-change="handleSelectionChange"
         :header-cell-style="{background:'#eef1f6',color:'#606266'}"
       >
         <el-table-column label="序号" type="index" width="50" align="center">
@@ -345,7 +344,6 @@ export default {
       this.itemForm.isDefault = false;
       this.dialogFormVisible2 = true;
       // this.title = "新增数据项";
-
     },
     editItem(row) {
       //修改数据项
@@ -359,6 +357,7 @@ export default {
       this.index = row.index;
       this.edit = true;
       this.listLoading = false;
+      
     },
     deleteItem(row) {
       this.row = row;
@@ -404,8 +403,10 @@ export default {
           } else {
             //修改字典
             this.tempList.dict = this.ruleForm;
-            console.log('ceid');
-            console.log(this.tempList)
+            for(var i in this.tempList.dictInfoList){
+              this.tempList.dictInfoList[i].tag = this.tempList.dict.tag
+            }
+            console.log(this.tempList);
             this.$axios.put('/dict/manage/',this.tempList).then(res=>{
               if(res){
                 this.$alert('修改成功')
@@ -461,6 +462,7 @@ export default {
           this.dialogFormVisible2 = false;   
         }
       });
+
       // console.log(this.tempList);
     },
     resetForm(formName) {

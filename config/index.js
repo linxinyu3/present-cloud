@@ -12,7 +12,7 @@ module.exports = {
     assetsPublicPath: '/',
     proxyTable: {
       '/': {
-        target: 'http://www.sunago.top/dcloud',//后端接口地址
+        target: 'http://www.sunago.top',//后端接口地址
         changOrigin: true,
         pathRewrite: {
           '^/': '/'

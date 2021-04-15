@@ -74,28 +74,6 @@ axios.interceptors.response.use(
     return
   }
 )
-// axios.interceptors.response.use(
-//   response => {
-//     if (response.status === 200) {
-//       if (response.data.respCode == "401") {
-//           localStorage.removeItem('Authorization');
-//           localStorage.removeItem('isLogin');
-//           router.replace('/login');
-//       }
-//       return response;
-//     } else {
-//         if (response.status == 401) {
-//             localStorage.removeItem('Authorization');
-//             localStorage.removeItem('isLogin');
-//             router.replace('/login');
-//         } else if (response.status != 500 && response.status != 403 && response.status != 404) {
-//             // 错误处理
-//             response.status = 'error'
-//         }
-//         return Promise.reject(response.status) // 必须返回
-//       }
-//   },
-// );
 
 new Vue({
   el: '#app',
