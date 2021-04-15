@@ -6,6 +6,7 @@
         :model="experienceForm"
         label-width="150px"
         style="width: 80%;margin: 0 20px;"
+        v-loading="loading"
       >
         <el-form-item
           label="签到经验值："
@@ -131,7 +132,6 @@ export default {
       },
       experienceFormInit: {
         settingSign: {
-          
             id: 1,
             signExp: 2,
             signDistance: 3
@@ -168,7 +168,8 @@ export default {
             rightBorder: 100
           },
         ],
-      }
+      },
+      loading: false,
     };
   },
   created() {
@@ -176,6 +177,7 @@ export default {
   },
   methods: {
     getData() {
+      this.loading = true;
       this.$axios.get("/setting/manage/").then(
         res => {
           if(res){
@@ -190,6 +192,7 @@ export default {
           });
         }
       );
+      this.loading = false;
     },
     removeLevelAndAttend(attendItem) {
       var index1 = this.experienceForm.settingLevelList.indexOf(attendItem);
@@ -209,25 +212,23 @@ export default {
       this.$refs[formName].validate(valid => {
         if (valid) {
           if (this.isContinuityNum()) {
-            var data = this.experienceForm
+            this.loading = true;
+            var data = this.experienceForm;
             this.$axios.put("/setting/manage/", data).then(
               res => {
                 if (res) {
-                  this.$alert("成功", "成功", {
-                    confirmButtonText: "确定"
-                  });
+                  // this.$alert("成功", "成功", {
+                  //   confirmButtonText: "确定"
+                  // });
+                  this.getData();
                 } else {
                   this.$alert(res.message, "失败", {
                     confirmButtonText: "确定"
                   });
                 }
               },
-              // res => {
-              //   this.$router.push({
-              //     path: "/" + res
-              //   });
-              // }
             );
+            this.loading = false;
           } else {
             this.$alert("设置的等级不连续", "失败", {
               confirmButtonText: "确定"
@@ -239,8 +240,25 @@ export default {
       });
     },
     resetForm(formName) {
-      this.experienceForm = this.experienceFormInit;
-      this.$alert("如确认修改为默认值，请点击保存！","已重置为默认值")
+      this.$confirm("确定要重置为默认值？", "重置为默认值", {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning",
+          
+        })
+        .then(() => {
+          this.loading = true;
+          this.$axios.put("/setting/manage/", this.experienceFormInit).then(
+            res => {
+              if (res) {
+                this.getData();
+              } else {
+                this.$alert(res.message, "失败", {
+                  confirmButtonText: "确定"
+                });
+              }
+            })
+        })
     },
     //判断等级是否是连续的
     isContinuityNum() {

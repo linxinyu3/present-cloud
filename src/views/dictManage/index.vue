@@ -2,11 +2,8 @@
   <div class="app-container">
     <div class="form-style">
       <el-form :inline="true" :model="formInline" class="demo-form-inline">
-        <el-form-item>
-          <el-button type="primary" size="small" @click="addData()" icon="el-icon-plus">新增</el-button>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="danger" size="small" @click="deleteData()" icon="el-icon-delete">删除</el-button>
+        <el-form-item style="float:left">
+          <el-button type="primary" size="small" @click="addData()" icon="el-icon-plus" >新增</el-button>
         </el-form-item>
         <el-form-item style="float:right">
           <el-button type="primary" size="small" @click="resetData()">重置</el-button>
@@ -27,12 +24,10 @@
         element-loading-text="Loading"
         fit
         highlight-current-row
-        ref="multipleTable"
         tooltip-effect="dark"
         style="width: 100%"
         :header-cell-style="{background:'#eef1f6',color:'#606266'}"
       >
-        <el-table-column type="selection" width="50"></el-table-column>
         <el-table-column label="序号" type="index" width="50" align="center">
           <template slot-scope="scope">
             <span>{{(page - 1) * pageSize + scope.$index + 1}}</span>
@@ -66,10 +61,10 @@
       <el-pagination
         background
         @current-change="handleCurrentChange"
-        layout="total, prev, pager, next"
-        :total="totalNum"
-        v-if="totalNum!=0"
+        :current-page.sync="page"
         :page-size="pageSize"
+        layout="total, prev, pager, next"
+        :total="totalNum">
       ></el-pagination>
     </div>
     <el-dialog :title="title" :visible.sync="dialogFormVisible">
@@ -210,7 +205,6 @@ export default {
         ]
       },
       listLoading: false,
-      multipleSelection: [],
       dialogFormVisible: false,
       ruleForm: {
         id:"",
@@ -246,6 +240,7 @@ export default {
         tagZh: ""
       },
       page: 1,
+      currentPage1: 1,
       edit: false
     };
   },
@@ -254,26 +249,26 @@ export default {
   },
   methods: {
     deleteRowData(row) {
-      this.$confirm("您确定要删除该项数据字典吗？", "删除数据字典", {
+      this.$confirm("您确定要删除该数据字典及其字典项吗？", "删除", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning"
       })
         .then(() => {
           this.listLoading = true;
-          this.$axios.delete("/dict/manage/?id=",row.id).then(
+          var that = this;
+          this.$axios.delete("/dict/manage/"  + row.id).then(
             res => {
               if (res) {
-                this.$alert("数据字典删除成功", "成功", {
-                  confirmButtonText: "确定"
-                });
-                this.page = 1;
-                this.showUserInfo(this.page);
+                // this.$alert("数据字典删除成功", "成功", {
+                //   confirmButtonText: "确定"
+                // });
+                that.showUserInfo(1);
               } else {
                 this.$alert( "失败", {
                   confirmButtonText: "确定"
                 });
-                this.showUserInfo(this.page);
+                that.showUserInfo(this.page);
               }
               this.listLoading = false;
             },
@@ -281,40 +276,14 @@ export default {
         })
         this.listLoading = false;
     },
-    handleSelectionChange(val) {
-      this.multipleSelection = val;
-    },
-    deleteData() {
-      //批量删除
-        if (this.multipleSelection.length == 0) {
-          this.$alert("请至少选中一条数据", "批量删除", {
-            confirmButtonText: "确定",
-          });
-        } else {
-          var data = [];
-          for (var i in this.multipleSelection) {
-            data.push(this.multipleSelection[i].id);
-          }
-          this.$confirm("确定要删除选择的数据字典？", "删除数据字典", {
-            confirmButtonText: "确定",
-            cancelButtonText: "取消",
-            type: "warning",
-            
-          })
-          .then(() => {
-            this.listLoading = true;
-            //删除后端数据
-            this.listLoading = false;
-          })
-        }
-    },
     searchData() {
       this.listLoading = true;
+      // this.page = 1;
       var data = {
         tag : this.formInline.tag,
         tagZh : this.formInline.tagZh
       }
-      this.$axios.get('/dict/manage/?tag='+data.tag +'&tagZh='+ data.tagZh).then(res=>{
+      this.$axios.get('/dict/manage/?tag='+data.tag +'&tagZh='+ data.tagZh +'&currentPage=' + this.page).then(res=>{
         if(res){
           this.list = res.data;
           this.totalNum = res.total;
@@ -335,19 +304,17 @@ export default {
       }
     },
     showUserInfo(page) {
-      this.totalNum = 1;
+      // this.totalNum = 1;
       this.listLoading = true;
       this.page = page;
       this.$axios.get('/dict/manage/?currentPage=' + this.page).then(res =>{
-        // console.log(res.data)
+        console.log(res.data)
         this.list = res.data;
         //获取用户信息
-        var data = {
-          page: this.page
-        };
-          this.listLoading = false;
-          this.totalNum = res.total;
+        this.listLoading = false;
+        this.totalNum = res.total;
         })
+      
     },
     reset() {
       this.ruleForm.tag = "";
@@ -375,7 +342,6 @@ export default {
       this.itemForm.sequence = "";
       this.itemForm.content = "";
       this.itemForm.isDefault = false;
-      console.log(typeof(this.itemForm.isDefault))
       this.dialogFormVisible2 = true;
       // this.title = "新增数据项";
     },
@@ -395,7 +361,7 @@ export default {
     },
     deleteItem(row) {
       this.row = row;
-      this.$confirm("确定要删除该数据字典？", "删除数据字典", {
+      this.$confirm("确定要删除该数据项？", "删除数据项", {
           confirmButtonText: "确定",
           cancelButtonText: "取消",
           type: "info"
@@ -419,44 +385,23 @@ export default {
               }
             }
           })
-      if (row.id != null && row.id != undefined) {
-        var data = [];
-        this.$axios.delete("/dict/manage/" ,data).then(
-          res => {
-            if (res) {
-              this.$alert("数据项删除成功", "成功", {
-                confirmButtonText: "确定"
-              });
-            } else {
-              this.$alert(res.respCode, "失败", {
-                confirmButtonText: "确定"
-              });
-            }
-          },
-          res => {
-            this.$router.push({
-              path: "/" + res
-            });
-          }
-        );
-      }
     },
     submitForm(formName) {
+      var that = this
       this.$refs[formName].validate(valid => {
         if (valid) {
-          this.dialogFormVisible = false;
           if (this.title == "新增数据字典") {
             //新增字典
             this.tempList.dict = this.ruleForm;
-            console.log(this.tempList)
+            console.log(this.tempList);
             this.$axios.post('/dict/manage/',this.tempList).then(res=>{
               if(res){
                 this.$alert("添加成功！")
+                that.showUserInfo(this.page);
               }
             })
           } else {
             //修改字典
-            console.log(this.tempList.dictInfoList)
             this.tempList.dict = this.ruleForm;
             for(var i in this.tempList.dictInfoList){
               this.tempList.dictInfoList[i].tag = this.tempList.dict.tag
@@ -464,11 +409,12 @@ export default {
             console.log(this.tempList);
             this.$axios.put('/dict/manage/',this.tempList).then(res=>{
               if(res){
-                console.log(res)
+                this.$alert('修改成功')
+                that.showUserInfo(this.page);
               }
             })
           }
-          this.showUserInfo();
+          this.dialogFormVisible = false;
         }
       else{
         console.log("修改无效")
@@ -489,6 +435,7 @@ export default {
               tag: this.ruleForm.tag
             })
           } else {
+            this.tempList.dict = this.ruleForm;
             for (var i in this.tempList.dictInfoList) {
               if (
                 (this.tempList.dictInfoList[i].index == this.row.index &&
@@ -505,7 +452,6 @@ export default {
                 this.tempList.dictInfoList[i].sequence = this.itemForm.sequence;
                 this.tempList.dictInfoList[i].content = this.itemForm.content;
                 this.tempList.dictInfoList[i].isDefault = this.itemForm.isDefault;
-                
                 //数据项与数据字典绑定
                 this.tempList.dictInfoList[i].tag = this.ruleForm.tag;
                 break;
@@ -516,6 +462,8 @@ export default {
           this.dialogFormVisible2 = false;   
         }
       });
+
+      // console.log(this.tempList);
     },
     resetForm(formName) {
       this.dialogFormVisible = false;
@@ -524,7 +472,6 @@ export default {
       this.showUserInfo(this.page);
     },
     handleCurrentChange(val) {
-      console.log(val);
       this.page = val;
       this.showUserInfo(this.page);
     },
