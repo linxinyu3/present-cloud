@@ -205,11 +205,9 @@ function routerGo() {
           },
         }]
       }
-      console.log('重新加入')
       router.options.routes.push(route)
     }
   }
   router.addRoutes(router.options.routes)
-  console.log(router.options.routes)
 }
 export default router

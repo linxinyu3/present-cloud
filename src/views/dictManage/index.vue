@@ -11,11 +11,8 @@
         <el-form-item style="float:right">
           <el-button type="primary" size="small" @click="searchData()">查询</el-button>
         </el-form-item>
-        <el-form-item label="中文标识：" style="float:right">
-          <el-input placeholder="请输入中文标识" size="small" v-model="formInline.tagZh"></el-input>
-        </el-form-item>
-        <el-form-item label="英文标识：" style="float:right">
-          <el-input placeholder="请输入英文标识" size="small" v-model="formInline.tag"></el-input>
+        <el-form-item label="中文标识或英文标识" style="float:right">
+          <el-input placeholder="请输入中文标识" size="small" v-model="formInline.search"></el-input>
         </el-form-item>
       </el-form>
       <el-table
@@ -236,8 +233,7 @@ export default {
       totalNum: 0,
       pageSize: 10,
       formInline: {
-        tag: "",
-        tagZh: ""
+        search: "",
       },
       page: 1,
       currentPage1: 1,
@@ -260,9 +256,6 @@ export default {
           this.$axios.delete("/dict/manage/"  + row.id).then(
             res => {
               if (res) {
-                // this.$alert("数据字典删除成功", "成功", {
-                //   confirmButtonText: "确定"
-                // });
                 that.showUserInfo(1);
               } else {
                 this.$alert( "失败", {
@@ -273,17 +266,13 @@ export default {
               this.listLoading = false;
             },
           );
-        })
+        }).catch(()=>{})
         this.listLoading = false;
     },
     searchData() {
       this.listLoading = true;
-      // this.page = 1;
-      var data = {
-        tag : this.formInline.tag,
-        tagZh : this.formInline.tagZh
-      }
-      this.$axios.get('/dict/manage/?tag='+data.tag +'&tagZh='+ data.tagZh +'&currentPage=' + this.page).then(res=>{
+      var data = this.formInline.search;
+      this.$axios.get('/dict/manage/?search='+ data+'&currentPage=' + this.page).then(res=>{
         if(res){
           this.list = res.data;
           this.totalNum = res.total;
@@ -304,7 +293,6 @@ export default {
       }
     },
     showUserInfo(page) {
-      // this.totalNum = 1;
       this.listLoading = true;
       this.page = page;
       this.$axios.get('/dict/manage/?currentPage=' + this.page).then(res =>{
@@ -384,7 +372,7 @@ export default {
                 break;
               }
             }
-          })
+          }).catch(()=>{})
     },
     submitForm(formName) {
       var that = this
@@ -476,8 +464,7 @@ export default {
       this.showUserInfo(this.page);
     },
     resetData() {
-      this.formInline.tag = "";
-      this.formInline.tagZh = "";
+      this.formInline.search = "";
       this.page = 1;
       this.showUserInfo(this.page);
     },
