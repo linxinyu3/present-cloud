@@ -2,22 +2,22 @@
   <div class="app-container">
     <div class="form-style">
       <el-form :inline="true" :model="searchForm" class="demo-form-inline">
-        <el-form-item style="float:left;padding-left:10%">
+        <el-form-item style="float:left;padding-left:5%;">
           <el-button type="primary" size="small" @click="addData()" icon="el-icon-plus">新增学校</el-button>
         </el-form-item>
-        <el-form-item style="float:right;;padding-right:10%">
+        <el-form-item style="float:right;;padding-right:5%">
           <el-button type="primary" size="small" @click="resetData()">重置</el-button>
         </el-form-item>
         <el-form-item style="float:right">
           <el-button type="primary" size="small" @click="searchData()">查询</el-button>
         </el-form-item>
-        <el-form-item label="名称：" style="float:right">
-          <el-input placeholder="请输入名称" size="small" v-model="filterText"></el-input>
+        <el-form-item label="搜索：" style="float:right">
+          <el-input placeholder="按学校或学院名称" size="small" v-model="filterText"></el-input>
         </el-form-item>
       </el-form>
       <div>
         <div class="dashboard-editor-container">
-          <el-button type="primary" style="width:100%;margin-bottom:20px;" size="small">学校组织机构</el-button>
+          <el-button type="primary" style="width:100%;margin-bottom:20px;font-size:18px;" size="small">学校组织结构</el-button>
           <el-tree
             :data="data"
             node-key="id"
@@ -31,16 +31,18 @@
                 <el-button
                   v-if="data.schoolCode"
                   type="text"
+                  style="font-size:16px;"
                   @click="append(node,data)">
                   + 新增学院
                 </el-button>
                 <el-button
                   type="text"
+                  style="font-size:16px;"
                   @click="edit(node,data)">
                   编辑
                 </el-button>
                 <el-button
-                  style="color:#F66C6C"
+                  style="color:#F66C6C;font-size:16px"
                   type="text"
                   @click="remove(node, data)">
                   删除
@@ -56,7 +58,6 @@
       <el-form :model="addForm" :rules="addRules" ref="addForm" v-if="title == '新增学校'">
         <el-form-item label="学校编号" :label-width="formLabelWidth" prop="schoolCode">
           <el-input v-model="addForm.schoolCode" autocomplete="off">
-            <!-- <template slot="prepend" v-if="!isAddSchool">{{selectTree}}</template> -->
           </el-input>
         </el-form-item>
         <el-form-item label="学校名称" :label-width="formLabelWidth" prop="name">
@@ -109,6 +110,8 @@ export default {
   watch: {
     filterText(val) {
       this.$refs.tree.filter(val);
+      console.log(val)
+      deep: true
     }
   },
   data() {
@@ -127,7 +130,8 @@ export default {
       dialogFormVisible2: false,
       totalNum: 0,
       searchForm: {
-        name: ""
+        name: "",
+        filterText: "",
       },
       data: [],
       id: 1,
@@ -254,27 +258,12 @@ export default {
         </span>);
     },
     searchData() {
-      this.list = [];
-      this.listLoading = true;
-      this.$http
-        .get("/api/schools?name=" + this.searchForm.name )
-        .then(
-          res => {
-            this.list = res.data.records;
-            this.listLoading = false;
-            this.totalNum = res.data.total;
-          },
-          res => {
-            this.$router.push({
-              path: "/" + res
-            });
-          }
-        );
     },
     getAllData() {
       this.selectTree = "";
       this.selectTreeId = "0";
       this.list = [];
+      this.filterText = ''
       this.$axios.get("/school/manage/tree").then(
         res => {
           if(res){
@@ -363,7 +352,8 @@ export default {
             })
           }else{
             var data = this.editDepartmentForm
-            this.$axios.post('/school/manage/dept/',data).then(res=>{
+            console.log(data)
+            this.$axios.put('/school/manage/dept/',data).then(res=>{
               if(res){
                 this.getAllData();
               }
@@ -393,11 +383,11 @@ export default {
         this.dialogFormVisible2 = true;
         this.editDepartmentForm.name = data.name;
         this.editDepartmentForm.parentId = data.parentId;
+        this.editDepartmentForm.id = data.id
       }
     },
     resetData() {
-      this.searchForm.name = "";
-      this.getAllData();
+      this.filterText = ''
     },
   }
 };
@@ -408,8 +398,9 @@ export default {
   margin: 20px 0 !important;
 }
 .dashboard-editor-container {
-  padding-left:10%;
-  width: 80%;
+  padding-left:5%;
+  padding-right:5%;
+  width: 90%;
 }
 </style>
 <style>
@@ -434,7 +425,7 @@ export default {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    font-size: 14px;
+    font-size: 17px;
     padding-right: 8px;
   }
 </style>
