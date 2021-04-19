@@ -259,6 +259,7 @@ export default {
               }
             })
         })
+        .catch(()=>{})
     },
     //判断等级是否是连续的
     isContinuityNum() {
