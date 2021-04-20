@@ -31,6 +31,7 @@ export default {
       this.$router.push({ path: "/login" });
       localStorage.removeItem('Authorization');
       localStorage.removeItem('isLogin');
+      localStorage.removeItem('menuList');
       location.reload(); 
     }
   }

@@ -11,6 +11,16 @@
       <div class="title-container">
         <img src="../../assets/cloud.png" style="width:250px" />
       </div>
+      <el-form-item prop="phone">
+        <el-input
+          prefix-icon="el-icon-phone"
+          name="phone"
+          type="text"
+          v-model="signupForm.phone"
+          autocomplete="on"
+          placeholder="请输入手机号"
+        ></el-input>
+      </el-form-item>
       <el-form-item prop="username">
         <el-input
           prefix-icon="el-icon-user-solid"
@@ -18,7 +28,7 @@
           type="text"
           v-model="signupForm.username"
           autocomplete="on"
-          placeholder="请输入手机号"
+          placeholder="请输入用户名"
         ></el-input>
       </el-form-item>
       <el-form-item prop="message">
@@ -61,6 +71,10 @@
           placeholder="请确认密码"
         ></el-input>
       </el-form-item>
+      <el-form-item>
+        <el-checkbox v-model="teacherRole" @change="changeRole()">我是教师</el-checkbox>
+        <el-checkbox v-model="adminRole" @change="changeRole2()">我是管理员</el-checkbox>
+      </el-form-item>
       <el-button
         type="primary"
         style="width:100%;margin-bottom:10px;"
@@ -97,13 +111,14 @@ export default {
     };
     return {
       signupForm: {
+        phone: null,
         username: "",
         message: "",
         pass: "",
         checkPass: ""
       },
       loginRules: {
-        username: [
+        phone: [
           { required: true, trigger: "blur", message: "请输入手机号" },
           {
             validator: function(rule, value, callback) {
@@ -116,6 +131,7 @@ export default {
             trigger: ["blur"]
           }
         ],
+        username: [{ required: true, trigger: "blur", message: "请输入用户名" }],
         message: [{ required: true, trigger: "blur", message: "请输入验证码" }],
         pass: [{ required: true, validator: validatePass, trigger: "blur" }],
         checkPass: [
@@ -126,19 +142,23 @@ export default {
       activeName: "1",
       butName: "获取验证码",
       isDisabled: false,
-      validateCode: ""
+      validateCode: "",
+      teacherRole: true,
+      adminRole: false,
+      roleId: 2
     };
   },
   methods: {
     getMessage() {
       var time = 60;
-      this.$refs.signupForm.validateField("username", errMsg => {
+      this.$refs.signupForm.validateField("phone", errMsg => {
         if (errMsg) {
         } else {
-          //生成4位随机验证码，短信验证功能等后端实现后引入
-          var Code =Math.floor(Math.random()*9000+1000*Math.random());
-          alert(Code);
-          localStorage.setItem("validateCode", Code);
+          this.$axios.get('/registerCaptcha?phone=' + this.signupForm.phone).then(res =>{
+            if(res){
+              console.log(res)
+            }
+          })
           //倒计时
           let timer = setInterval(() => {
             if (time == 0) {
@@ -155,19 +175,22 @@ export default {
       });
     },
     signup() {
-      var flag = false;
-      var flag1 = false;
       this.$refs.signupForm.validate(valid => {
         if (valid) {
-          if (localStorage.getItem("validateCode") != this.signupForm.message) {
-            this.$alert("验证码错误，请重新输入", "注册失败", {
-              confirmButtonText: "确定"
-            });
-          } else {
-            //存储用户注册信息
-            this.loading = true;
-            this.login();
+          var data = {
+            phone : this.signupForm.phone,
+            username: this.signupForm.username,
+            password: this.signupForm.pass,
+            checkPassword: this.signupForm.checkPass,
+            code: this.signupForm.message,
+            roleId: this.roleId
           }
+          this.$axios.post('/register', data).then(res =>{
+            if(res){
+              this.loading = true;
+              this.login();
+            }
+          })
         } else {
           return false;
         }
@@ -175,6 +198,24 @@ export default {
     },
     login() {
       this.$router.push("/login");
+    },
+    changeRole(){
+      if(this.teacherRole){
+        this.roleId = 2
+        this.adminRole = false
+      }else{
+        this.roleId = 1
+        this.adminRole = true
+      }
+    },
+    changeRole2(){
+      if(this.adminRole){
+        this.roleId = 1
+        this.teacherRole = false
+      }else{
+        this.roleId = 2
+        this.teacherRole = true
+      }
     }
   }
 };

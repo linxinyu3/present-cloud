@@ -110,13 +110,12 @@ export default {
   watch: {
     filterText(val) {
       this.$refs.tree.filter(val);
-      console.log(val)
       deep: true
     }
   },
   data() {
     var validatePass = (rule, value, callback) => {
-      if (/^[\u4E00-\u9FA5]$/.test(value) == false) {
+      if (/^[^\s\u4e00-\u9fa5]$/.test(value) == false) {
         callback(new Error("必须为中文名"));
       } else {
         callback();
@@ -208,17 +207,7 @@ export default {
     append(node,data) {
       this.title = '新增学院'
       this.dialogFormVisible2 = true;
-      console.log(node)
       this.addDepartmentForm.parentId = node.key
-      console.log(this.data)
-      // const newChild = { id: 3, label: 'testtest', children: [] };
-      // if (!data.children) {
-      //   this.$set(data, 'children', []);
-      // }
-      // // data.children.push(newChild);
-      // this.data[0].children.push(newChild)
-      // // data.children.push(newChild);
-      // console.log(this.data);
     },
 
     remove(node, data) {
@@ -246,17 +235,6 @@ export default {
           })
         .catch(() => {});
     },
-
-    renderContent(h, { node, data, store }) {
-      return (
-        <span class="custom-tree-node">
-          <span>{node.label}</span>
-          <span>
-            <el-button  type="text" on-click={ () => this.append(data) }>Append</el-button>
-            <el-button  type="text" on-click={ () => this.remove(node, data) }>Delete</el-button>
-          </span>
-        </span>);
-    },
     searchData() {
     },
     getAllData() {
@@ -276,7 +254,6 @@ export default {
               }
             }
             this.id = res[0].id;
-            console.log(this.data)
           }
         },
       );
@@ -316,7 +293,6 @@ export default {
               id: this.editForm.id,
               schoolCode: this.editForm.schoolCode
             };
-            console.log(data)
             this.$axios.put("/school/manage/", data).then(
               res => {
                 if (res) {
@@ -352,7 +328,6 @@ export default {
             })
           }else{
             var data = this.editDepartmentForm
-            console.log(data)
             this.$axios.put('/school/manage/dept/',data).then(res=>{
               if(res){
                 this.getAllData();
@@ -370,7 +345,6 @@ export default {
       this.getAllData();
     },
     edit(node,data){
-      console.log(data)
       if(node.parent.parent == null){
         this.title = '编辑学校信息';
         this.editForm.schoolCode = data.schoolCode;

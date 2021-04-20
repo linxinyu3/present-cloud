@@ -169,10 +169,11 @@ export default {
       this.$refs.loginForm1.validateField("username", errMsg => {
         if (errMsg) {
         } else {
-          //生成4位随机验证码，短信验证功能等后端实现后引入
-          var Code =Math.floor(Math.random()*9000+1000*Math.random());
-          alert(Code);
-          localStorage.setItem("validateCode", Code);
+          this.$axios.get('/loginCaptcha?phone=' + this.loginForm1.username).then(res =>{
+            if(res){
+              console.log(res)
+            }
+          })
           //倒计时
           let timer = setInterval(() => {
             if (time == 0) {
@@ -221,8 +222,10 @@ export default {
                   localStorage.setItem('menuList', JSON.stringify(data))
                   this.$router.push("/home");
                 })    
-                
-                }
+              }else{
+                localStorage.removeItem('menuList');
+              }
+              this.loading = false;
             })
           }
         });
@@ -251,11 +254,10 @@ export default {
                   localStorage.setItem('menuList', JSON.stringify(data))
                 })    
                 this.$router.push("/home");     
-              } else {
-                this.$alert("验证码错误，请重新输入", "登录失败", {
-                confirmButtonText: "确定"
-                });
-              }            
+              }else{
+                localStorage.removeItem('menuList');
+              }
+              this.loading = false;          
             })
           }
         });
