@@ -179,7 +179,6 @@ export default {
     submitForm(formName) {
       this.$refs[formName].validate(valid => {
         this.ruleForm.sexCode = parseInt(this.ruleForm.sexCode)
-        this.ruleForm.birthday = ""
         console.log(this.ruleForm)
         if (valid) {
           this.$axios.put("/common/user/edit", this.ruleForm).then(
@@ -200,7 +199,6 @@ export default {
       this.$refs[formName].resetFields();
       this.ruleForm.phone = temp
       this.ruleForm.sexCode = "27"
-      this.ruleForm.birthday = ""
       this.placeholder = "请选择"
     },
     submitForm2(formName) {
