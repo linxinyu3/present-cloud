@@ -5,6 +5,7 @@
       label-width="80px"
       :model="ruleForm"
       :rules="rules"
+      v-loading="loading"
       ref="ruleForm"
     >
       <el-form-item label="电话号码:" prop="phone">
@@ -52,32 +53,6 @@
         <el-button @click="resetForm('ruleForm')" style="width:40%">重置</el-button>
       </el-form-item>
     </el-form>
-
-    <!-- <el-button type="primary" style="width:100%;margin-bottom:20px;">密码修改</el-button>
-    <el-form
-      :model="ruleForm2"
-      status-icon
-      :rules="rules2"
-      ref="ruleForm2"
-      label-width="100px"
-      class="demo-ruleForm"
-      style="width:90%"
-    >
-      <el-form-item label="原密码" required>
-        <el-input v-model="ruleForm2.oldPass"></el-input>
-      </el-form-item>
-      <el-form-item label="新密码" prop="pass" required>
-        <el-input v-model="ruleForm2.pass"></el-input>
-      </el-form-item>
-      <el-form-item label="确认密码" prop="checkPass" required>
-        <el-input v-model="ruleForm2.checkPass"></el-input>
-      </el-form-item>
-
-      <el-form-item>
-        <el-button type="primary" @click="submitForm2('ruleForm2')" style="width:40%">提交</el-button>
-        <el-button @click="resetForm2('ruleForm2')" style="width:40%">重置</el-button>
-      </el-form-item>
-    </el-form> -->
   </div>
 </template>
 
@@ -116,8 +91,8 @@ export default {
       }
     };
     return {
+      loading: true,
       ruleForm: {
-
       },
       ruleForm2: {
         oldPass: "",
@@ -126,6 +101,8 @@ export default {
       },
       rules: {
         name: [{ required: true, message: "请输入用户名", trigger: "blur" }],
+        number: [{ required: true, message: "请输入工号", trigger: "blur" }],
+        sexCode: [{ required: true, message: "请选择性别", trigger: "blur" }],
         email:[{type: "email", message: "请输入正确的邮箱", trigger: ["blur", "change"]}],
         school: [{ required: false, validator: validateSchool, trigger: "change" }],
       },
@@ -138,7 +115,7 @@ export default {
       schoolId: "",
       departmentId: "",
       school: [],
-      placeholder: ""
+      placeholder: "请选择院校"
     };
   },
   created() {
@@ -150,17 +127,23 @@ export default {
       this.showUserInfo();
     },
     showUserInfo() {
+      this.loading = true;
       this.$axios.get("/common/user/info").then(res => {
         if(res){
+          this.ruleForm = res
           if(res.schoolId != null){
-            this.ruleForm = res
-            this.ruleForm.sexCode = res.sexCode.toString()
             this.placeholder = res.school.name + "/" + res.department.name
           }
+          if(this.ruleForm.sexCode == null){
+            this.ruleForm.sexCode = ''
+          }
+          this.ruleForm.sexCode = res.sexCode.toString()
         }
       });
+      this.loading = false;
     },
     showSchool() {
+      this.loading = true;
       this.$axios.get("/school/manage/tree").then(res => {
         if(res){
           this.school = res;
@@ -175,10 +158,13 @@ export default {
           }
         }
       });
+      this.loading = false;
     },
     submitForm(formName) {
       this.$refs[formName].validate(valid => {
+        this.loading = true;
         this.ruleForm.sexCode = parseInt(this.ruleForm.sexCode)
+        this.ruleForm.createTime = null
         console.log(this.ruleForm)
         if (valid) {
           this.$axios.put("/common/user/edit", this.ruleForm).then(
@@ -192,6 +178,7 @@ export default {
           );
           return false;
         }
+      this.loading = false;
       });
     },
     resetForm(formName) {
@@ -213,7 +200,7 @@ export default {
           };
           this.$http.post("/api/user/updatePassword", data).then(
             res => {
-              if (res.data.respCode == "1") {
+              if (res) {
                 this.$alert("密码修改成功，跳转到登录页重新登录", "成功", {
                   confirmButtonText: "确定"
                 });
@@ -221,7 +208,7 @@ export default {
                 localStorage.removeItem("isLogin");
                 this.$router.push("/login");
               } else {
-                this.$alert(res.data.respCode, "失败", {
+                this.$alert( "失败", {
                   confirmButtonText: "确定"
                 });
               }
