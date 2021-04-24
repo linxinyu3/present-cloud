@@ -2,10 +2,10 @@
   <div class="app-container">
     <div class="form-style">
       <el-form :inline="true" :model="searchForm" class="demo-form-inline">
-        <el-form-item style="float:left;padding-left:5%;">
+        <el-form-item style="float:left;padding-left:10%;">
           <el-button type="primary" size="small" @click="addData()" icon="el-icon-plus">新增学校</el-button>
         </el-form-item>
-        <el-form-item style="float:right;;padding-right:5%">
+        <el-form-item style="float:right;;padding-right:10%">
           <el-button type="primary" size="small" @click="resetData()">重置</el-button>
         </el-form-item>
         <el-form-item style="float:right">
@@ -17,7 +17,7 @@
       </el-form>
       <div>
         <div class="dashboard-editor-container">
-          <el-button type="primary" style="width:100%;margin-bottom:20px;font-size:18px;" size="small">学校组织结构</el-button>
+          <el-button type="primary" style="width:100%;margin-bottom:20px;font-size:17px;" size="small">学校组织结构</el-button>
           <el-tree
             :data="data"
             node-key="id"
@@ -372,9 +372,9 @@ export default {
   margin: 20px 0 !important;
 }
 .dashboard-editor-container {
-  padding-left:5%;
-  padding-right:5%;
-  width: 90%;
+  padding-left:10%;
+  padding-right:10%;
+  width: 80%;
 }
 </style>
 <style>
