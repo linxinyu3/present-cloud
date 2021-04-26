@@ -9,7 +9,7 @@
         v-loading="loading"
       >
         <el-form-item
-          label="签到经验值："
+          label="签到经验值"
           prop="settingSign.signExp"
           :rules="[
             { required: true, message: '签到经验值不能为空'},
@@ -24,7 +24,37 @@
           </el-tooltip>
         </el-form-item>
         <el-form-item
-          label="签到距离KM："
+          label="迟到经验值"
+          prop="settingSign.lateExp"
+          :rules="[
+            { required: true, message: '签到经验值不能为空'},
+            { type: 'number', message: '签到经验值必须为数字值'}
+          ]"
+        >
+        <el-input v-model.number="experienceForm.settingSign.lateExp"></el-input>
+        </el-form-item>
+                <el-form-item
+          label="早退经验值"
+          prop="settingSign.leaveEarlyExp"
+          :rules="[
+            { required: true, message: '签到经验值不能为空'},
+            { type: 'number', message: '签到经验值必须为数字值'}
+          ]"
+        >
+          <el-input v-model.number="experienceForm.settingSign.leaveEarlyExp"></el-input>
+        </el-form-item>
+                <el-form-item
+          label="请假经验值"
+          prop="settingSign.dayOffExp"
+          :rules="[
+            { required: true, message: '签到经验值不能为空'},
+            { type: 'number', message: '签到经验值必须为数字值'}
+          ]"
+        >
+        <el-input v-model.number="experienceForm.settingSign.dayOffExp"></el-input>
+        </el-form-item>
+        <el-form-item
+          label="签到距离(M)"
           prop="settingSign.signDistance"
           :rules="[
             { required: true, message: '距离不能为空'},
@@ -33,7 +63,7 @@
         >
           <el-tooltip effect="dark" placement="top">
             <div slot="content">
-              默认0KM，表示不限定距离。
+              默认0M，表示不限定距离。
             </div>
             <el-input v-model.number="experienceForm.settingSign.signDistance"></el-input>
           </el-tooltip>
@@ -119,6 +149,9 @@ export default {
         settingSign: {
             id: null,
             signExp: "",
+            dayOffExp: "",
+            lateExp: "",
+            leaveEarlyExp: "",
             signDistance: 0
         },
         settingLevelList: [
@@ -134,7 +167,10 @@ export default {
         settingSign: {
             id: 1,
             signExp: 2,
-            signDistance: 3
+            dayOffExp: 0,
+            lateExp: 1,
+            leaveEarlyExp: 1,
+            signDistance: 100
         },
         settingLevelList: [
           {
@@ -230,7 +266,7 @@ export default {
             );
             this.loading = false;
           } else {
-            this.$alert("设置的等级不连续", "失败", {
+            this.$alert("保存失败！设置的出勤等级不连续", "失败", {
               confirmButtonText: "确定"
             });
           }
