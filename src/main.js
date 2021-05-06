@@ -36,12 +36,28 @@ axios.interceptors.response.use(
     // 200接受数据成功，如果错误  包含错误码和错误消息  如果成功也直接打印成功的信息  就不用在页面逻辑里面打印成功or失败信息了
     if (success.status && success.status == 200) {
       // 如果是500 401 403消息  就直接弹出提示后端提供的消息 然后直接return 就啥数据也不返回
+      if (success.data.code == 500) {
+        Message.error({ message: success.data.message })
+        return
+      }
+      if (success.data.code == 401
+      ) {
+        localStorage.removeItem('Authorization');
+        localStorage.removeItem('isLogin');
+        router.replace('/login');
+        Message.error({ message: '尚未登录，请登录' })
+        return
+      }
       if (
-        success.data.code == 500 ||
-        success.data.code == 401 ||
         success.data.code == 403
       ) {
-        Message.error({ message: success.data.message })
+        this.$router.push('/error/403')
+        return
+      }
+      if (
+        success.data.code == 404
+      ) {
+        this.$router.push('/error/404')
         return
       }
       // 如果有消息就直接打印成功的消息
@@ -54,10 +70,10 @@ axios.interceptors.response.use(
   },
   (error) => {
     if (error.response.statusCode == 404) {
-      Message.error({ message: '服务器被吃了o(╯□╰)o' })
+      // Message.error({ message: '服务器被吃了o(╯□╰)o' })
       this.$router.push('/error/404')
     } else if (error.response.statusCode == 403) {
-      Message.error({ message: '权限不足，请联系管理员' })
+      // Message.error({ message: '权限不足，请联系管理员' })
       this.$router.push('/error/403')
     } else if (error.response.statusCode == 401) {
       Message.error({ message: '尚未登录，请登录' })
