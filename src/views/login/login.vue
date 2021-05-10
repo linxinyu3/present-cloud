@@ -252,8 +252,8 @@ export default {
                 this.$axios.get('/menu/currentUser').then(res=>{
                   var data = res[0]
                   localStorage.setItem('menuList', JSON.stringify(data))
-                })    
-                this.$router.push("/home");     
+                  this.$router.push("/home");  
+                })       
               }else{
                 localStorage.removeItem('menuList');
               }
