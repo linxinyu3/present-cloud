@@ -79,58 +79,6 @@ export const router = new Router({
       }
       }]
     },
-    {
-      path: '/',
-      name: 'form',
-      redirect: '/form',
-      component: layout,
-      alwaysShow: true,
-      meta: {
-        title: 'form',
-        icon: 'el-icon-tickets',
-        roles: ['admin', 'editor'] // you can set roles in root nav
-      },
-      children: [{
-        path: '/form',
-        component: form,
-        name: 'form',
-        meta: {
-          title: '基础表单模板',
-          roles: ['admin', 'editor'] // you can set roles in root nav
-        },
-      }]
-    },
-    {
-      path: '/error',
-      component: layout,
-      redirect: 'noRedirect',
-      name: 'ErrorPages',
-      // hidden: true,
-      meta: {
-        title: 'Error Pages',
-        icon: 'el-icon-warning-outline',
-      },
-      children: [
-        {
-          path: '403',
-          component: errorpage403,
-          name: 'Page403',
-          meta: { title: '403', noCache: true }
-        },
-        {
-          path: '404',
-          component: errorpage404,
-          name: 'Page404',
-          meta: { title: '404', noCache: true }
-        },
-        {
-          path: '500',
-          component: errorpage500,
-          name: 'Page500',
-          meta: { title: '500', noCache: true }
-        },
-      ]
-    },
   ]
 })
 var flag = true
