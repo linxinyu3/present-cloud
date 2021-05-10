@@ -188,48 +188,6 @@ export default {
       this.ruleForm.sexCode = "27"
       this.placeholder = "请选择"
     },
-    submitForm2(formName) {
-      this.$refs[formName].validate(valid => {
-        if (valid) {
-          var data = {
-            email: localStorage.getItem("account"),
-            newpassword1: this.ruleForm2.pass,
-            newpassword2: this.ruleForm2.checkPass,
-            oldpassword: this.ruleForm2.oldPass
-          };
-          this.$http.post("/api/user/updatePassword", data).then(
-            res => {
-              if (res) {
-                this.$alert("密码修改成功，跳转到登录页重新登录", "成功", {
-                  confirmButtonText: "确定"
-                });
-                localStorage.removeItem("Authorization");
-                localStorage.removeItem("isLogin");
-                this.$router.push("/login");
-              } else {
-                this.$alert( "失败", {
-                  confirmButtonText: "确定"
-                });
-              }
-            },
-            res => {
-              this.$router.push({
-                path: "/" + res
-              });
-            }
-          );
-        } else {
-          this.$alert("有必填项未填写或者填写错误", "警告", {
-            confirmButtonText: "确定"
-          });
-          return false;
-        }
-      });
-    },
-    resetForm2(formName) {
-      this.$refs[formName].resetFields();
-      this.ruleForm2.oldPass = "";
-    },
     handleAvatarSuccess(res, file) {
       this.imageUrl = URL.createObjectURL(file.raw);
     },
