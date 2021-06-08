@@ -1,331 +1,231 @@
 <template>
   <div class="app-container">
     <div class="form-style">
-      <el-form
-        ref="experienceForm"
-        :model="experienceForm"
-        label-width="150px"
-        style="width: 80%;margin: 0 20px;"
-        v-loading="loading"
-      >
-        <el-form-item
-          label="签到经验值"
-          prop="settingSign.signExp"
-          :rules="[
-            { required: true, message: '签到经验值不能为空'},
-            { type: 'number', message: '签到经验值必须为数字值'}
-          ]"
-        >
-          <el-tooltip effect="dark" placement="top">
-            <div slot="content">
-              学生参与一次签到可获取的经验值
-            </div>
-            <el-input v-model.number="experienceForm.settingSign.signExp"></el-input>
-          </el-tooltip>
-        </el-form-item>
-        <el-form-item
-          label="迟到经验值"
-          prop="settingSign.lateExp"
-          :rules="[
-            { required: true, message: '签到经验值不能为空'},
-            { type: 'number', message: '签到经验值必须为数字值'}
-          ]"
-        >
-        <el-input v-model.number="experienceForm.settingSign.lateExp"></el-input>
-        </el-form-item>
-                <el-form-item
-          label="早退经验值"
-          prop="settingSign.leaveEarlyExp"
-          :rules="[
-            { required: true, message: '签到经验值不能为空'},
-            { type: 'number', message: '签到经验值必须为数字值'}
-          ]"
-        >
-          <el-input v-model.number="experienceForm.settingSign.leaveEarlyExp"></el-input>
-        </el-form-item>
-                <el-form-item
-          label="请假经验值"
-          prop="settingSign.dayOffExp"
-          :rules="[
-            { required: true, message: '签到经验值不能为空'},
-            { type: 'number', message: '签到经验值必须为数字值'}
-          ]"
-        >
-        <el-input v-model.number="experienceForm.settingSign.dayOffExp"></el-input>
-        </el-form-item>
-        <el-form-item
-          label="签到距离(M)"
-          prop="settingSign.signDistance"
-          :rules="[
-            { required: true, message: '距离不能为空'},
-            { type: 'number', message: '距离必须为整数值'}
-          ]"
-        >
-          <el-tooltip effect="dark" placement="top">
-            <div slot="content">
-              默认0M，表示不限定距离。
-            </div>
-            <el-input v-model.number="experienceForm.settingSign.signDistance"></el-input>
-          </el-tooltip>
-        </el-form-item>
-        <el-row>
-          <el-col :span="11">
-            <el-form-item
-              v-for="(level, index) in experienceForm.settingLevelList"
-              :label="'出勤等级' + (index+1)"
-              :key="level.key"
-              :prop="'settingLevelList.' + index + '.lv'"
-              :rules="[
-                {required: true, message: '等级不能为空', trigger: 'blur'},
-                {type: 'number', message: '等级必须为数字值'}]"
-            >
-              <el-input v-model.number="level.lv">
-                <template slot="prepend">LV</template>
-              </el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="13">
-            <el-form-item
-              v-for="(attendance, index) in experienceForm.settingLevelList"
-              :label="'出勤率' + (index+1)"
-              :key="attendance.key"
-              :prop="'settingLevelList.' + index+'.rightBorder'"
-              :rules="{
-                 required: true, message: '出勤率不能为空', trigger: 'blur'}"
-            >
-              <el-row :gutter="20">
-                <el-col :span="18">
-                  <el-row :gutter="20">
-                    <el-col :span="11">
-                      <el-input 
-                      v-model="attendance.leftBorder" 
-                      :disabled = "index == 0">
-                        <template slot="append" style="padding:0 10px">%</template>
-                      </el-input>
-                    </el-col>
-                    <el-col :span="1">-</el-col>
-                    <el-col :span="11">
-                      <el-input
-                        v-model="attendance.rightBorder"
-                      >
-                        <template slot="append" style="padding:0 10px">%</template>
-                      </el-input>
-                    </el-col>
-                  </el-row>
-                </el-col>
-                <el-col :span="1" style="margin-right:25px">
-                  <i
-                    class="el-icon-circle-plus"
-                    @click="addLevelAndAttend()"
-                    style="color:#409eff;font-size:27px;"
-                    v-show="index+1==experienceForm.settingLevelList.length&&attendance.rightBorder!=''"
-                  ></i>
-                </el-col>
-                <el-col :span="1">
-                  <i
-                    class="el-icon-remove"
-                    @click.prevent="removeLevelAndAttend(attendance)"
-                    style="color:red;font-size:27px"
-                    v-show="index+1==experienceForm.settingLevelList.length && experienceForm.settingLevelList.length>1 "
-                  ></i>
-                </el-col>
-              </el-row>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-form-item style="text-align:center">
-          <el-button type="primary" @click="onSubmit('experienceForm')" style="width:40%">保存</el-button>
-          <el-button @click="resetForm('experienceForm')" style="width:40%">设置为默认值</el-button>
+      <el-form  class="demo-form-inline">
+        <el-form-item style="float:left">
+          <el-button type="primary" size="small" @click="addData()" icon="el-icon-plus">新增</el-button>
         </el-form-item>
       </el-form>
+      <el-table
+        :data="list"
+        v-loading="listLoading"
+        element-loading-text="Loading"
+        border
+        fit
+        highlight-current-row
+        tooltip-effect="dark"
+        style="width: 100%"
+        row-key="id"
+        :tree-props="{children: 'children', hasChildren: 'hasChildren'}"
+        :header-cell-style="{background:'#eef1f6',color:'#606266'}"
+      >
+        <el-table-column label="名称" min-width="70" align="center">
+          <template slot-scope="scope">
+            <span>{{scope.row.name}}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="关键字" min-width="50" align="center">
+          <template slot-scope="scope">
+            <span>{{scope.row.keyword}}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="值" min-width="50" align="center">
+          <template slot-scope="scope">
+            <span>{{scope.row.value}}</span>
+          </template>
+        </el-table-column>
+        <el-table-column align="center" label="操作" min-width="80">
+          <template slot-scope="scope">
+            <div>
+              <el-link type="primary" @click="editData(scope.row)">编辑</el-link>
+              <el-divider direction="vertical"></el-divider>
+              <el-link type="danger" @click="deleteUser(scope.row)">删除</el-link>
+            </div>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <el-pagination
+        background
+        @current-change="handleCurrentChange"
+        layout="total, prev, pager, next"
+        :total="totalNum"
+        v-if="totalNum!=0"
+        :page-size="pageSize"
+      ></el-pagination>
     </div>
+    <el-dialog :title="title" :visible.sync="dialogFormVisible">
+      <el-form
+        :model="settingForm"
+        :rules="settingRule"
+        ref="settingForm"
+        label-width="150px"
+      >
+        <el-form-item label="名称" prop="name">
+          <el-input v-model="settingForm.name"></el-input>
+        </el-form-item>
+        <el-form-item label="关键字" prop="keyword">
+          <el-input v-model="settingForm.keyword" @blur="checkkeyword"></el-input>
+        </el-form-item>
+        <el-form-item label="值" prop="value">
+          <el-input v-model="settingForm.value"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer" style="text-align: center;margin-bottom:10px">
+        <el-button type="primary" @click="submitForm('settingForm')" style="width:180px">提交</el-button>
+        <el-button @click="resetForm('settingForm')" style="width:180px">取消</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
+
 <script>
 export default {
   data() {
     return {
-      experienceForm: {
-        settingSign: {
-            id: null,
-            signExp: "",
-            dayOffExp: "",
-            lateExp: "",
-            leaveEarlyExp: "",
-            signDistance: 0
-        },
-        settingLevelList: [
-          {
-            id: null,
-            lv: 1,
-            leftBorder: 0,
-            rightBorder: null
-          }
-        ],
+      list: [],
+      listLoading: false,
+      dialogFormVisible: false,
+      settingForm: {
+        id: "",
+        name: "",
+        keyword: "",
+        value: ""
       },
-      experienceFormInit: {
-        settingSign: {
-            id: 1,
-            signExp: 2,
-            dayOffExp: 0,
-            lateExp: 1,
-            leaveEarlyExp: 1,
-            signDistance: 100
-        },
-        settingLevelList: [
-          {
-            id: 11,
-            lv: 1,
-            leftBorder: 0,
-            rightBorder: 20
-          },
-          {
-            id: 12,
-            lv: 2,
-            leftBorder: 21,
-            rightBorder: 40
-          },
-          {
-            id: 13,
-            lv: 3,
-            leftBorder: 41,
-            rightBorder: 60
-          },
-          {
-            id: 14,
-            lv: 4,
-            leftBorder: 61,
-            rightBorder: 80
-          },
-          {
-            id: 15,
-            lv: 5,
-            leftBorder: 81,
-            rightBorder: 100
-          },
-        ],
+      settingRule: {
+        name: [{ required: true, message: "请输入名称", trigger: "blur" }],
+        keyword: [{ required: true, message: "请输入关键字", trigger: "blur" }],
+        value: [{ required: true, message: "请输入值", trigger: "blur" }],
       },
-      loading: false,
+      totalNum: 0,
+      title: "新增系统参数",
+      pageSize: 10,
+      page: 1,
     };
   },
   created() {
-    this.getData();
+    this.showData(this.page);
   },
   methods: {
-    getData() {
-      this.loading = true;
-      this.$axios.get("/setting/manage/").then(
-        res => {
-          if(res){
-            console.log(res)
-            this.experienceForm.settingSign = res.settingSign
-            this.experienceForm.settingLevelList = res.settingLevelList;
-          }
-        },
-        res => {
-          this.$router.push({
-            path: "/" + res
+    checkkeyword(){
+      this.$axios.get("/setting/manage/ckkwd/" + this.settingForm.keyword)
+    },
+    reset() {
+      this.settingForm.id = null;
+      this.settingForm.name = "";
+      this.settingForm.keyword = "";
+      this.settingForm.value = "";
+    },
+    addData() {
+      this.reset();
+      this.dialogFormVisible = true;
+      this.title = "新增系统参数";
+    },
+    deleteUser(row) {
+      this.$confirm("确定要删除该系统参数？", "删除系统参数", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+        .then(() => {
+          this.$axios.delete("/setting/manage/" + row.id).then(res => {
+            if (res) {
+              this.showData(this.page);
+            }
           });
+        })
+        // .catch(() => {});
+    },
+    editData(row) {
+      this.settingForm = row;
+      this.title = "编辑系统参数";
+      this.dialogFormVisible = true;
+    },
+    showData(page) {
+      this.list = [];
+      this.listLoading = true;
+      this.page = page;
+      var data = {
+        page: this.page
+      };
+      this.$axios.get("/setting/manage/").then(res => {
+        this.listLoading = false;
+        if(res){
+          this.list = res
         }
-      );
-      this.loading = false;
+      });  
     },
-    removeLevelAndAttend(attendItem) {
-      var index1 = this.experienceForm.settingLevelList.indexOf(attendItem);
-      if (index1 !== -1) {
-        this.experienceForm.settingLevelList.splice(index1, 1);
-      }
-    },
-    addLevelAndAttend() {
-      this.experienceForm.settingLevelList.push({
-        id: null,
-        lv: null,
-        leftBorder: null,
-        rightBorder: null,
-      });
-    },
-    onSubmit(formName) {
+    submitForm(formName) {
+      var data = {
+        id: this.settingForm.id,
+        name: this.settingForm.name,
+        keyword: this.settingForm.keyword,
+        value: this.settingForm.value,
+      };
+      var addData = {
+        name: this.settingForm.name,
+        keyword: this.settingForm.keyword,
+        value: this.settingForm.value,
+      };
       this.$refs[formName].validate(valid => {
         if (valid) {
-          if (this.isContinuityNum()) {
-            this.loading = true;
-            var data = this.experienceForm;
-            this.$axios.put("/setting/manage/", data).then(
-              res => {
-                if (res) {
-                  // this.$alert("成功", "成功", {
-                  //   confirmButtonText: "确定"
-                  // });
-                  this.getData();
-                } else {
-                  this.$alert(res.message, "失败", {
-                    confirmButtonText: "确定"
-                  });
-                }
-              },
-            );
-            this.loading = false;
+          this.dialogFormVisible = false;
+          if (this.title == "新增系统参数") {
+            this.$axios.post("/setting/manage/", addData).then(res => {
+              if (res) {
+                this.showData(this.page);
+              } else {
+                this.showData(this.page);
+              }
+              this.$refs[formName].resetFields();
+            });
           } else {
-            this.$alert("保存失败！设置的出勤等级不连续", "失败", {
-              confirmButtonText: "确定"
+            console.log(data)
+            this.$axios.put("/setting/manage/", data).then(res => {
+              if (res) {
+                  this.listLoading = true;
+                  this.showData(this.page);
+              } else {
+                this.showData(this.page);
+              }
             });
           }
-        } else {
-          return false;
         }
       });
     },
     resetForm(formName) {
-      this.$confirm("确定要重置为默认值？", "重置为默认值", {
-          confirmButtonText: "确定",
-          cancelButtonText: "取消",
-          type: "warning",
-          
-        })
-        .then(() => {
-          this.loading = true;
-          this.$axios.put("/setting/manage/", this.experienceFormInit).then(
-            res => {
-              if (res) {
-                this.getData();
-              } else {
-                this.$alert(res.message, "失败", {
-                  confirmButtonText: "确定"
-                });
-              }
-            })
-        })
-        .catch(()=>{})
+      this.dialogFormVisible = false;
+      this.$refs[formName].resetFields();
+      this.reset();
+      this.showData(this.page);
     },
-    //判断等级是否是连续的
-    isContinuityNum() {
-      var num = [];
-      for (var i in this.experienceForm.settingLevelList) {
-        num.push(this.experienceForm.settingLevelList[i].lv);
-      }
-      let array = [];
-      if (num instanceof Array) {
-        array = [...num];
-      } else {
-        array = Array.from(num.toString()); //转换为数组
-      }
-
-      var i = array[0];
-      var isContinuation = true;
-      for (var e in array) {
-        if (array[e] != i) {
-          isContinuation = false;
-          break;
-        }
-        i++;
-      }
-      return isContinuation;
-    }
+    handleCurrentChange(val) {
+      this.page = val;
+      this.showData(this.page);
+    },
   }
 };
 </script>
+<style scoped>
+.el-pagination {
+  text-align: center !important;
+  margin: 20px 0 !important;
+}
+.app-container {
+  background-color: #f0f2f5;
+  min-height: 100vh;
+  height: 100%;
+}
+.form-style {
+  background: #fff;
+  padding: 20px;
+}
+</style>
 <style>
-.el-input-group__append {
-  padding: 0 10px !important;
+.el-table__header {
+  width: auto !important;
+}
+.el-table__body {
+  width: auto !important;
 }
 </style>
