@@ -130,7 +130,7 @@ export default {
         sequence: [{ required: true, message: "请输入", trigger: "blur" }],
       },
       totalNum: 0,
-      title: "新增用户",
+      title: "新增菜单",
       pageSize: 10,
       page: 1,
     };
@@ -165,10 +165,10 @@ export default {
       this.$confirm("确定要删除该菜单？", "删除菜单", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
-        type: "info"
+        type: "warning"
       })
         .then(() => {
-          this.$axios.delete("/menu/manage/", id).then(res => {
+          this.$axios.delete("/menu/manage/" + id).then(res => {
             if (res) {
               location.reload();
               this.showMenuData(this.page);
