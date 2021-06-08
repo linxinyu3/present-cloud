@@ -11,8 +11,8 @@
         <el-form-item style="float:right">
           <el-button type="primary" size="small" @click="searchData()">查询</el-button>
         </el-form-item>
-        <el-form-item label="中文标识或英文标识" style="float:right">
-          <el-input placeholder="请输入中文标识" size="small" v-model="formInline.search"></el-input>
+        <el-form-item label="名称或关键字" style="float:right">
+          <el-input placeholder="请输入名称" size="small" v-model="formInline.search"></el-input>
         </el-form-item>
       </el-form>
       <el-table
@@ -30,14 +30,14 @@
             <span>{{(page - 1) * pageSize + scope.$index + 1}}</span>
           </template>
         </el-table-column>
-        <el-table-column label="英文标识" min-width="80" align="center">
-          <template slot-scope="scope">
-            <span>{{scope.row.tag}}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="中文标识" min-width="80" align="center">
+        <el-table-column label="名称" min-width="80" align="center">
           <template slot-scope="scope">
             <span>{{scope.row.tagZh}}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="关键字" min-width="80" align="center">
+          <template slot-scope="scope">
+            <span>{{scope.row.tag}}</span>
           </template>
         </el-table-column>
         <el-table-column label="描述" min-width="80" align="center">
@@ -72,11 +72,11 @@
         label-width="100px"
         class="demo-ruleForm"
       >
-        <el-form-item label="英文标识" prop="tag">
-          <el-input v-model="ruleForm.tag" placeholder="请输入英文标识"></el-input>
+        <el-form-item label="名称" prop="tagZh">
+          <el-input v-model="ruleForm.tagZh" placeholder="请输入名称"></el-input>
         </el-form-item>
-        <el-form-item label="中文标识" prop="tagZh">
-          <el-input v-model="ruleForm.tagZh" placeholder="请输入中文标识"></el-input>
+        <el-form-item label="关键字" prop="tag">
+          <el-input v-model="ruleForm.tag" placeholder="请输入关键字"></el-input>
         </el-form-item>
         <el-form-item label="描述" prop="description">
           <el-input v-model="ruleForm.description" placeholder="请添加描述"></el-input>
@@ -84,9 +84,10 @@
       </el-form>
       <el-divider></el-divider>
       <div class="form-style1" >
-        <span style="font-size:23px">数据项</span>
+        <span style="font-size:18px">字典明细项</span>
         <el-table
           :data="tempList.dictInfoList"
+          row-key="id"
           v-loading="listLoading"
           element-loading-text="Loading"
           fit
@@ -97,17 +98,17 @@
         >
           <el-table-column label="序号" type="index" width="50" align="center">
             <template slot-scope="scope">
-              <span >{{scope.$index}}</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="顺序" min-width="100" align="center">
-            <template slot-scope="scope">
-              <span >{{scope.row.sequence}}</span>
+              <span>{{(page - 1) * pageSize + scope.$index + 1}}</span>
             </template>
           </el-table-column>
           <el-table-column label="文本" min-width="100" align="center">
             <template slot-scope="scope">
               <span>{{scope.row.content}}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="值" min-width="100" align="center">
+            <template slot-scope="scope">
+              <span >{{scope.row.value}}</span>
             </template>
           </el-table-column>
           <el-table-column label="是否默认值" min-width="100" align="center">
@@ -119,18 +120,19 @@
           <el-table-column label="操作" min-width="150" align="center">
             <template slot-scope="scope">
               <div >
-                <i class="el-icon-edit" @click="editItem(scope.row)"></i>
-                <i
-                  class="el-icon-delete"
-                  @click="deleteItem(scope.row)"
-                  style="color:red;margin-left:20px"
-                ></i>
+                <el-button @click.native.prevent="moveRow(scope.$index, scope.row, 'up')" type="text"> 上移 </el-button>
+                <el-divider direction="vertical"></el-divider>
+                <el-button @click.native.prevent="moveRow(scope.$index, scope.row, 'down')" type="text"> 下移 </el-button>
+                <el-divider direction="vertical"></el-divider>
+                <el-link type="primary" @click="editItem(scope.row)">编辑</el-link>
+                <el-divider direction="vertical"></el-divider>
+                <el-link type="danger" @click="deleteItem(scope.row)">删除</el-link>
               </div>
             </template>
           </el-table-column>
         </el-table>
         <el-button class="el-icon-circle-plus"  @click="addItem()" style="color:#409eff;font-size:23px;border:none">
-          新增数据项
+          新增字典明细项
         </el-button>
       </div>
       <div slot="footer" class="dialog-footer" style="text-align: center;margin-bottom:10px">
@@ -154,21 +156,22 @@
         label-width="100px"
         class="demo-ruleForm"
       >
-        <el-form-item label="顺序" prop="sequence">
+        <el-form-item label="值" prop="value">
           <el-tooltip effect="dark" placement="top">
             <div slot="content">
-              该数据项在该数据字典中的顺序，必须为数值
+              该字典明细项的值，必须为数值
             </div>
             <el-input
-              v-model.number="itemForm.sequence"
-              placeholder="请输入顺序"
+              v-model.number="itemForm.value"
+              placeholder="请输入值"
+              @blur="checkvalue"
             ></el-input>
           </el-tooltip>
         </el-form-item>
         <el-form-item label="文本" prop="content">
           <el-tooltip effect="dark" placement="top">
             <div slot="content">
-              数据项的值，例如“男”、“女”
+              字典明细项的文本，例如“男”、“女”
             </div>
             <el-input v-model="itemForm.content" placeholder="请输入文本"></el-input>
           </el-tooltip>
@@ -179,7 +182,7 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer" style="text-align: center;margin-bottom:10px">
-        <el-button type="primary" @click="submitItemForm('itemForm')" style="width:180px">提交</el-button>
+        <el-button type="primary" @click="submitItemForm('itemForm')" style="width:180px">保存</el-button>
         <el-button @click="resetItemForm('itemForm')" style="width:180px">取消</el-button>
       </div>
     </el-dialog>
@@ -187,6 +190,8 @@
 </template>
 
 <script>
+import Sortable from 'sortablejs'
+import {Message} from 'element-ui'
 export default {
   data() {
     return {
@@ -211,24 +216,25 @@ export default {
       },
       dialogFormVisible2: false,
       itemForm: {
-        sequence: "",
+        sequence: null,
+        value: null,
         content: "",
         isDefault: false
       },
       value: "",
       title: "新增数据字典",
-      title2: "新增数据项",
+      title2: "新增字典明细项",
       itemFormRules: {
-        sequence: [
-          { required: true, message: "请输入顺序", trigger: "blur" },
+        value: [
+          { required: true, message: "请输入值", trigger: "blur" },
           { type: "number", message: "值必须为数字值" }
         ],
         content: [{ required: true, message: "请输入文本", trigger: "blur" }]
       },
       rules: {
-        tag: [{ required: true, message: "请输入英文标识", trigger: "blur" }],
-        tagZh: [{ required: true, message: "请输入中文标识", trigger: "blur" }],
-        description: [{ required: true, message: "请添加描述", trigger: "blur" }]
+        tag: [{ required: true, message: "请输入关键字", trigger: "blur" }],
+        tagZh: [{ required: true, message: "请输入名称", trigger: "blur" }],
+        // description: [{ required: true, message: "请添加描述", trigger: "blur" }]
       },
       totalNum: 0,
       pageSize: 10,
@@ -237,13 +243,57 @@ export default {
       },
       page: 1,
       currentPage1: 1,
-      edit: false
+      edit: false,
+      order: 0
     };
   },
   created() {
     this.showUserInfo(this.page);
   },
+   mounted() {
+  },
   methods: {
+    checkvalue(){
+      for(var i in this.tempList.dictInfoList){
+        if(this.tempList.dictInfoList[i].content != this.itemForm.content && 
+          this.tempList.dictInfoList[i].value == this.itemForm.value)
+          this.$message({
+            message: '数值重复，请重新输入',
+            type: 'warning'
+          });
+      }
+    },
+    moveRow(index, e, type) {
+      if (type === 'up') {
+        if (index <= 0) {
+          this.$message({
+            message: '已经是第一条，上移失败',
+            type: 'warning'
+          });
+        }else{
+          // 在上一项插入该项
+          this.tempList.dictInfoList.splice(index - 1, 0, (this.tempList.dictInfoList[index]))
+          // 删除后一项
+          this.tempList.dictInfoList.splice(index + 1, 1)
+        }
+      } else if (type === 'down') {
+        if (index === (this.tempList.dictInfoList.length - 1)) {
+          this.$message({
+                    message: '已经是最后一条，下移失败',
+                    type: 'warning'
+                });
+        }else{
+          // 在下一项插入该项
+          this.tempList.dictInfoList.splice(index + 2, 0, (this.tempList.dictInfoList[index]))
+          // 删除前一项
+          this.tempList.dictInfoList.splice(index, 1)
+        }
+      }
+      var count = 0
+      for(var i in this.tempList.dictInfoList){
+        this.tempList.dictInfoList[i].sequence = count++
+      }
+    },
     deleteRowData(row) {
       this.$confirm("您确定要删除该数据字典及其字典项吗？", "删除", {
         confirmButtonText: "确定",
@@ -278,8 +328,7 @@ export default {
           this.totalNum = res.total;
           this.listLoading = false;
           if(res.data.length < 1){
-            this.$alert("请选择其他中文/英文标识","找不到所要查询的字典",  {
-              confirmButtonText: "确定"
+            this.$message("请选择其他中文/关键字","找不到所要查询的字典",  {
             });
           }
         }
@@ -296,7 +345,6 @@ export default {
       this.listLoading = true;
       this.page = page;
       this.$axios.get('/dict/manage/?currentPage=' + this.page).then(res =>{
-        console.log(res.data)
         this.list = res.data;
         //获取用户信息
         this.listLoading = false;
@@ -321,24 +369,30 @@ export default {
         var data;
     },
     addItem() {
-      //新增数据项
+      //新增字典明细项
       if(this.ruleForm.tag == "" || this.ruleForm.tag == undefined){
-        this.$alert("请先填写数据字典，再添加数据项","注意")
+        this.$alert("请先填写数据字典，再添加字典明细项","注意")
         return;
       }
-      this.title2 = "新增数据项"
-      this.itemForm.sequence = "";
+      this.title2 = "新增字典明细项"
+      var max = -1
+      for(var i in this.tempList.dictInfoList){
+        if(max < this.tempList.dictInfoList[i].value){
+          max = this.tempList.dictInfoList[i].value
+        }
+      }
+      this.itemForm.value = max + 1
       this.itemForm.content = "";
       this.itemForm.isDefault = false;
       this.dialogFormVisible2 = true;
-      // this.title = "新增数据项";
+      // this.title = "新增字典明细项";
     },
     editItem(row) {
-      //修改数据项
-      this.title2 = "修改数据项"
+      //修改字典明细项
+      this.title2 = "修改字典明细项"
       this.listLoading = true;
       this.row = row;
-      this.itemForm.sequence = parseInt(row.sequence);
+      this.itemForm.value = parseInt(row.value);
       this.itemForm.content = row.content;
       this.itemForm.isDefault = row.isDefault;
       this.dialogFormVisible2 = true;
@@ -349,10 +403,10 @@ export default {
     },
     deleteItem(row) {
       this.row = row;
-      this.$confirm("确定要删除该数据项？", "删除数据项", {
+      this.$confirm("确定要删除该字典明细项？", "删除字典明细项", {
           confirmButtonText: "确定",
           cancelButtonText: "取消",
-          type: "info"
+          type: "warning"
         })
           .then(() => {
             for (var i in this.tempList.dictInfoList) {
@@ -379,12 +433,14 @@ export default {
       this.$refs[formName].validate(valid => {
         if (valid) {
           if (this.title == "新增数据字典") {
+            var count = 0
+            for(var i in this.tempList.dictInfoList){
+              this.tempList.dictInfoList[i].sequence = count++
+            }
             //新增字典
             this.tempList.dict = this.ruleForm;
-            console.log(this.tempList);
             this.$axios.post('/dict/manage/',this.tempList).then(res=>{
               if(res){
-                this.$alert("添加成功！")
                 that.showUserInfo(this.page);
               }
             })
@@ -394,10 +450,8 @@ export default {
             for(var i in this.tempList.dictInfoList){
               this.tempList.dictInfoList[i].tag = this.tempList.dict.tag
             }
-            console.log(this.tempList);
             this.$axios.put('/dict/manage/',this.tempList).then(res=>{
               if(res){
-                this.$alert('修改成功')
                 that.showUserInfo(this.page);
               }
             })
@@ -410,13 +464,18 @@ export default {
       });
     },
     submitItemForm(formName) {
-      //提交数据项
+      //提交字典明细项
       this.$refs[formName].validate(valid => {
         if (valid) {
           if (!this.edit) {
+            if(this.itemForm.isDefault == true ){
+              for(var i in this.tempList.dictInfoList){
+                this.tempList.dictInfoList[i].isDefault = false
+              }
+            }
             var index = this.tempList.dictInfoList.length;
             this.tempList.dictInfoList.push({
-              sequence : this.itemForm.sequence,
+              value : this.itemForm.value,
               content: this.itemForm.content,
               isDefault : this.itemForm.isDefault,
               index: index,
@@ -437,21 +496,25 @@ export default {
                   this.row.id != null &&
                   this.row.id != undefined)
               ) {
-                this.tempList.dictInfoList[i].sequence = this.itemForm.sequence;
+                this.tempList.dictInfoList[i].value = this.itemForm.value;
                 this.tempList.dictInfoList[i].content = this.itemForm.content;
                 this.tempList.dictInfoList[i].isDefault = this.itemForm.isDefault;
-                //数据项与数据字典绑定
+                //字典明细项与数据字典绑定
                 this.tempList.dictInfoList[i].tag = this.ruleForm.tag;
                 break;
               }
+            }
+            if(this.itemForm.isDefault == true){
+              for(var i in this.tempList.dictInfoList){
+                if(this.tempList.dictInfoList[i].content != this.itemForm.content)
+                  this.tempList.dictInfoList[i].isDefault = false
+                }
             }
             this.edit = false;
           }
           this.dialogFormVisible2 = false;   
         }
       });
-
-      // console.log(this.tempList);
     },
     resetForm(formName) {
       this.dialogFormVisible = false;
