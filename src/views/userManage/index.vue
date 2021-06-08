@@ -53,17 +53,19 @@
           <template slot-scope="scope">
             <span v-if="scope.row.roleId=='1'">管理员</span>
             <span v-if="scope.row.roleId=='2'">教师</span>
-            <span v-if="scope.row.roleId=='3'">学生</span>
           </template>
         </el-table-column>
         <el-table-column label="状态" min-width="50" align="center">
           <template slot-scope="scope">
-            <el-button
-              :type="btnState(scope.row.enabled)"
-              plain
-              @click="changeState(scope.row)"
-              size="small"
-            >{{filterState(scope.row.enabled)}}</el-button>
+            <el-tooltip class="item" effect="dark" content="点击改变角色状态" placement="top-start">
+              <el-button
+                :type="btnState(scope.row.enabled)"
+                plain
+                @click="changeState(scope.row)"
+                size="small"
+              >{{filterState(scope.row.enabled)}}
+              </el-button>
+            </el-tooltip>
           </template>
         </el-table-column>
         <el-table-column align="center" label="操作" min-width="150">
@@ -116,11 +118,11 @@
           <el-radio v-model="ruleForm.enabled" :label="false">禁用</el-radio>
         </el-form-item>
         <el-form-item label="角色" prop="roleId">
-          <el-radio v-model="ruleForm.roleId" label="3" >学生</el-radio>
+          <el-radio v-model="ruleForm.roleId" label="1" >管理员</el-radio>
           <el-radio v-model="ruleForm.roleId" label="2" >老师</el-radio>
-          <el-tooltip class="item" effect="dark" content="您没有设置管理员角色的权限" placement="top-start">
+          <!-- <el-tooltip class="item" effect="dark" content="您没有设置管理员角色的权限" placement="top-start">
             <el-radio v-model="ruleForm.roleId" label="1" disabled>管理员</el-radio>
-          </el-tooltip>
+          </el-tooltip> -->
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer" style="text-align: center;margin-bottom:10px">
@@ -269,32 +271,24 @@ export default {
       }
     },
     changeState(row) {
-      if(row.roleId != 1){
-        var data ={
-          id: row.id,
-          enabled: !row.enabled
-        }
-        this.listLoading = true;
-        this.$axios.put("/user/manage/", data).then(
-          res => {
-            if (res) {
-              this.$alert("状态修改成功", "成功");
-              this.showUserInfo(this.page);
-            }
-            this.listLoading = false;
-          },
-          res => {
-            this.$router.push({
-              path: "/" + res
-            });
-          }
-        );
-      }else{
-        this.$alert("抱歉，您没有修改管理员状态权限", {
-          confirmButtonText: "确定"
-        });
+      var data ={
+        id: row.id,
+        enabled: !row.enabled
       }
-     
+      this.listLoading = true;
+      this.$axios.put("/user/manage/", data).then(
+        res => {
+          if (res) {
+            this.showUserInfo(this.page);
+          }
+          this.listLoading = false;
+        },
+        res => {
+          this.$router.push({
+            path: "/" + res
+          });
+        }
+      );
     },
     resetPass(row) {
       //重置密码
@@ -370,7 +364,7 @@ export default {
       this.title = "新增用户";
     },
     deleteRowData(row) {
-      if(row.roleId != 1){
+      if(row.roleId != 1 || row.roleId != 2){
         this.$confirm("您确定要删除该用户吗？", "删除", {
           confirmButtonText: "确定",
           cancelButtonText: "取消",
@@ -494,10 +488,10 @@ export default {
       this.showUserInfo(this.page);
     },
     editData(row) {
-      if(row.roleId.toString() == '1'){
-        this.$alert("抱歉，您没有修改管理员的权限")
-        return;
-      }
+      // if(row.roleId.toString() == '1'){
+      //   this.$alert("抱歉，您没有修改管理员的权限")
+      //   return;
+      // }
       this.ruleForm.id = row.id;
       this.ruleForm.phone = row.phone;
       this.ruleForm.name = row.name;
