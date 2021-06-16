@@ -4,7 +4,7 @@
     <!-- <img src="../../../assets/title.png" class="title-image" /> -->
     <el-dropdown class="avatar-container" trigger="click">
       <div class="avatar-wrapper">
-        <img class="user-avatar" src="../../../assets/userImg.jpg" />
+        <img class="user-avatar" :src="jpg" />
         <i class="el-icon-caret-bottom"></i>
       </div>
       <el-dropdown-menu class="user-dropdown" slot="dropdown">
@@ -91,11 +91,19 @@ export default {
         pass: [{required: true, validator: validatePass, trigger: "blur" }],
         checkPass: [{required: true, validator: validatePass2, trigger: "blur" }]
       },
-      id: ''
+      id: '',
+      jpg: ''
     }
   },
   computed: {
     ...mapGetters(["sidebar", "avatar"])
+  },
+  created () {
+    this.$axios.get('/common/user/info').then(res=>{
+      if(res){
+        this.jpg = res.userFace
+      }
+    })
   },
   methods: {
     editpassword(){
