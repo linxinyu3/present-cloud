@@ -109,7 +109,6 @@
           <el-input v-model="editForm.description"></el-input>
         </el-form-item>
       </el-form>
-
       <div slot="footer" class="dialog-footer" v-if="title=='新增课程'">
         <el-button @click="resetForm('addForm')">取 消</el-button>
         <el-button type="primary" @click="submitForm('addForm')">确 定</el-button>
@@ -220,10 +219,10 @@ export default {
       this.listLoading = false;
     },
     reset() {
-      this.addForm.name = "";
-      this.addForm.type = "";
-      this.addForm.courseCode = "";
-      this.addForm.description = "";
+      this.addForm.name = null;
+      this.addForm.type = null;
+      this.addForm.courseCode = null;
+      this.addForm.description = null;
     },
     addData() {
       this.reset();
@@ -290,6 +289,7 @@ export default {
     resetForm(formName) {
       this.dialogFormVisible = false;
       this.$refs[formName].resetFields();
+      this.reset();
       this.getAllData(this.page);
     },
     handleCurrentChange(val) {
