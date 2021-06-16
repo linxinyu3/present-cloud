@@ -259,7 +259,7 @@ export default {
           this.tempList.dictInfoList[i].value == this.itemForm.value)
           this.$message({
             message: '数值重复，请重新输入',
-            type: 'warning'
+            type: 'error'
           });
       }
     },
@@ -432,6 +432,13 @@ export default {
       var that = this
       this.$refs[formName].validate(valid => {
         if (valid) {
+          if(this.tempList.dictInfoList.length == 0){
+            this.$message({
+              message: '请添加字典明细项',
+              type: 'error'
+            });
+            return;
+          }
           if (this.title == "新增数据字典") {
             var count = 0
             for(var i in this.tempList.dictInfoList){
