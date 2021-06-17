@@ -49,10 +49,11 @@
             <span v-if="scope.row.sexCode=='28'">女</span>
           </template>
         </el-table-column>
-        <el-table-column  label="角色" min-width="100" align="center">
+        <el-table-column  label="角色" min-width="100" align="center" :sortable="true" :sort-method="sortByDate">
           <template slot-scope="scope">
             <span v-if="scope.row.roleId=='1'">管理员</span>
             <span v-if="scope.row.roleId=='2'">教师</span>
+            <span v-if="scope.row.roleId=='3'">学生</span>
           </template>
         </el-table-column>
         <el-table-column label="状态" min-width="50" align="center">
@@ -103,41 +104,42 @@
         <el-form-item label="用户名" prop="name">
           <el-input v-model="ruleForm.name" placeholder="请输入用户名称"></el-input>
         </el-form-item>
-        <el-form-item label="密码" prop="password" v-if="this.title == '新增用户'">
+        <!-- <el-form-item label="密码" prop="password" v-if="this.title == '新增用户'">
           <el-input type="password" v-model="ruleForm.password" placeholder="请输入密码" ></el-input>
         </el-form-item>
         <el-form-item label="确认密码" prop="checkPass" v-if="this.title == '新增用户'" >
           <el-input type="password" v-model="ruleForm.checkPass" placeholder="请再次输入密码" ></el-input>
-        </el-form-item>
+        </el-form-item> -->
         <el-form-item label="性别">
           <el-radio v-model="ruleForm.sexCode" label="27">男</el-radio>
           <el-radio v-model="ruleForm.sexCode" label="28">女</el-radio>
         </el-form-item>
-        <el-form-item label="状态" v-if="this.title != '新增用户'">
+        <el-form-item label="状态">
           <el-radio v-model="ruleForm.enabled" :label="true">正常</el-radio>
           <el-radio v-model="ruleForm.enabled" :label="false">禁用</el-radio>
         </el-form-item>
         <el-form-item label="角色" prop="roleId">
           <el-radio v-model="ruleForm.roleId" label="1" >管理员</el-radio>
           <el-radio v-model="ruleForm.roleId" label="2" >老师</el-radio>
+          <el-radio v-model="ruleForm.roleId" label="3" >学生</el-radio>
           <!-- <el-tooltip class="item" effect="dark" content="您没有设置管理员角色的权限" placement="top-start">
             <el-radio v-model="ruleForm.roleId" label="1" disabled>管理员</el-radio>
           </el-tooltip> -->
         </el-form-item>
       </el-form>
+      <span v-if="this.title == '新增用户'">密码初始化为系统参数中的默认密码</span>
       <div slot="footer" class="dialog-footer" style="text-align: center;margin-bottom:10px">
         <el-button type="primary" @click="submitForm('ruleForm')" style="width:180px">提交</el-button>
         <el-button @click="resetForm('ruleForm')" style="width:180px">取消</el-button>
       </div>
-      <div
+      <!-- <div
         slot="footer"
         class="dialog-footer"
         style="text-align: center;color: #5d5b5b;font-size:14px"
         v-if="title=='新增用户'"
       >
-       <span>新增用户状态默认为正常</span>
-      </div>
-
+       <span>新增用户密码初始化为系统参数中的默认密码</span>
+      </div> -->
     </el-dialog>
         <el-dialog title="修改密码" :visible.sync="dialogFormVisible2">
       <el-form
@@ -171,13 +173,13 @@
 <script>
 export default {
   data() {
-    var validatePass = (rule, value, callback) => {
-      if (/^1[34578]\d{9}$/.test(value) == false) {
-        callback(new Error("手机号格式错误"));
-      } else {
-        callback();
-      }
-    };   
+    // var validatePass = (rule, value, callback) => {
+    //   if (/^1[34578]\d{9}$/.test(value) == false) {
+    //     callback(new Error("手机号格式错误"));
+    //   } else {
+    //     callback();
+    //   }
+    // };
     var validatePass2 = (rule, value, callback) => {
       var pattern=/^(?!^[0-9]+$)(?!^[A-z]+$)(?!^[^A-z0-9]+$)^[^\s\u4e00-\u9fa5]{6,16}$/
       if (value === "") {
@@ -219,7 +221,7 @@ export default {
         password: "",
         checkPass: "",
         sexCode: "27",
-        roleId: "3",
+        roleId: "2",
         enabled: true,
       },
       passwordForm:{
@@ -230,10 +232,10 @@ export default {
       temp:{},
       roleAu: false,
       rules: {
-        phone: [{ required: true, validator: validatePass, trigger: "blur" }],
+        phone: [{ required: true, message: "请输入手机号", trigger: "blur" }],
         name: [{ required: true, message: "请输入用户名称", trigger: "blur" }],
-        password: [{ required: true, validator: validatePass2,trigger: "blur"}],
-        checkPass: [{ required: true, validator: validatePass3, trigger: "blur" }],
+        // password: [{ required: true, validator: validatePass2,trigger: "blur"}],
+        // checkPass: [{ required: true, validator: validatePass3, trigger: "blur" }],
         roleId: [{ required: true, message: "请选择角色", trigger: "change" }],
         enabled:[{ required: true, message: "请选择用户状态", trigger: "change" }],
       },
@@ -256,6 +258,11 @@ export default {
     this.showUserInfo(this.page);
   },
   methods: {
+    sortByDate(obj1, obj2) {
+      let val1 = obj1.roleId
+      let val2 = obj2.roleId
+      return val1 - val2
+    },
     filterState(enabled) {
       if (enabled == "1") {
         return "正常";
@@ -292,12 +299,12 @@ export default {
     },
     resetPass(row) {
       //重置密码
-      if(row.roleId == '1'){
-         this.$alert("抱歉，您没有修改管理员密码权限，请联系管理员", {
-          confirmButtonText: "确定"
-        });
-        return;
-      }
+      // if(row.roleId == '1'){
+      //    this.$alert("抱歉，您没有修改管理员密码权限，请联系管理员", {
+      //     confirmButtonText: "确定"
+      //   });
+      //   return;
+      // }
       this.dialogFormVisible2 = true;
       this.passwordForm.id = row.id;
     },
@@ -355,7 +362,7 @@ export default {
       this.ruleForm.password = null;
       this.ruleForm.checkPass = null;
       this.ruleForm.sexCode = '27';
-      this.ruleForm.roleId = '3';
+      this.ruleForm.roleId = '1';
       this.ruleForm.enabled = true
     },
     addData() {
@@ -404,8 +411,9 @@ export default {
             var data = {
               phone: this.ruleForm.phone,
               name: this.ruleForm.name,
-              password: this.ruleForm.password,
+              username: this.ruleForm.name,
               sexCode: this.ruleForm.sexCode,
+              enabled: this.ruleForm.enabled,
               roleId: this.ruleForm.roleId,
             };
             this.listLoading = true;
@@ -432,7 +440,6 @@ export default {
               roleId: this.ruleForm.roleId,
               enabled: this.ruleForm.enabled
             };
-            console.log(data);
             this.listLoading = true;
             this.$axios.put("/user/manage/", data).then(
               res => {
@@ -462,10 +469,10 @@ export default {
         if (valid) {
           var data = {
             id: this.passwordForm.id,
-            password: this.passwordForm.password
+            newPassword: this.passwordForm.password
           }
-          this.$axios.put('',data).then(res=>{
-            
+          this.$axios.post('/user/manage/changepassword/',data).then(res=>{
+            this.dialogFormVisible2 = false;
           })
         }
       });
