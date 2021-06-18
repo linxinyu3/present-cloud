@@ -75,10 +75,12 @@
         label-width="100px"
         class="demo-roleForm"
       >
-        <el-form-item label="角色名称" prop="nameZh">
+        <el-form-item label="角色英文名" prop="name">
+          <el-input v-model="roleForm.name"></el-input>
+        </el-form-item>
+        <el-form-item label="角色中文名" prop="nameZh">
           <el-input v-model="roleForm.nameZh"></el-input>
         </el-form-item>
-
         <el-form-item label="角色状态" v-if="title=='编辑角色'">
           <el-radio v-model="roleForm.state" label="0">禁用</el-radio>
           <el-radio v-model="roleForm.state" label="1">启用</el-radio>
@@ -274,6 +276,7 @@ export default {
         state: this.roleForm.state
       };
       var addData = {
+        name: this.roleForm.name,
         nameZh: this.roleForm.nameZh
       };
       this.$refs[formnameZh].validate(valid => {
@@ -309,6 +312,7 @@ export default {
       this.$axios.put('/role/manage/menus',data).then(res => {
         if(res){
           this.dialogFormVisible2 = false;
+          location.reload()
         }
       })
     },
