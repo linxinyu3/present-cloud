@@ -76,10 +76,10 @@
         <el-button @click="resetForm('addForm')">取 消</el-button>
         <el-button type="primary" @click="submitForm('addForm')">确 定</el-button>
       </div>
-      <div slot="footer" class="dialog-footer" v-if="title == '编辑学校信息'">
+      <!-- <div slot="footer" class="dialog-footer" v-if="title == '编辑学校信息'">
         <el-button @click="resetForm('editForm')">取 消</el-button>
         <el-button type="primary" @click="submitForm('editForm')">确 定</el-button>
-      </div>
+      </div> -->
     </el-dialog>
 
     <el-dialog :title="title" :visible.sync="dialogFormVisible2">
@@ -139,7 +139,6 @@ export default {
         label: "label"
       },
       addForm: {
-        id: "",
         name: "",
         schoolCode: ""
       },
@@ -264,7 +263,7 @@ export default {
       this.addForm.schoolCode = "";
     },
     addData() {
-      this.reset();
+      this.resetForm(this.addForm);
       this.title = "新增学校";
       this.isAdd = true;
       if (this.selectTree != "") {
@@ -285,7 +284,7 @@ export default {
                 this.getAllData();
               }
             })
-            this.reset();
+            this.resetForm(formName)
           } else {
             //修改信息
             var data = {
@@ -312,6 +311,7 @@ export default {
     },
     resetForm(formName) {
       this.dialogFormVisible = false;
+      this.reset();
       this.$refs[formName].resetFields();
       this.getAllData();
     },
@@ -341,6 +341,9 @@ export default {
     },
     resetDepartmentForm(formName) {
       this.dialogFormVisible2 = false;
+      this.addDepartmentForm.id = null;
+      this.addDepartmentForm.name = null;
+      this.addDepartmentForm.parentId = null;
       this.$refs[formName].resetFields();
       this.getAllData();
     },
