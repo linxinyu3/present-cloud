@@ -55,31 +55,19 @@
       </div>
     </div>
     <el-dialog :title="title" :visible.sync="dialogFormVisible">
-      <el-form :model="addForm" :rules="addRules" ref="addForm" v-if="title == '新增学校'">
+      <el-form :model="schoolForm" :rules="addRules" ref="schoolForm">
         <el-form-item label="学校编号" :label-width="formLabelWidth" prop="schoolCode">
-          <el-input v-model="addForm.schoolCode" autocomplete="off">
+          <el-input v-model="schoolForm.schoolCode" autocomplete="off">
           </el-input>
         </el-form-item>
         <el-form-item label="学校名称" :label-width="formLabelWidth" prop="name">
-          <el-input v-model="addForm.name" autocomplete="off"></el-input>
+          <el-input v-model="schoolForm.name" autocomplete="off"></el-input>
         </el-form-item>
       </el-form>
-      <el-form :model="editForm" :rules="editRules" ref="editForm" v-if="title == '编辑学校信息'">
-        <el-form-item label="学校编号" :label-width="formLabelWidth" prop="schoolCode">
-          <el-input v-model="editForm.schoolCode" autocomplete="off" ></el-input>
-        </el-form-item>
-        <el-form-item label="学校名称" :label-width="formLabelWidth" prop="name">
-          <el-input v-model="editForm.name" autocomplete="off"></el-input>
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer" v-if="title == '新增学校'">
-        <el-button @click="resetForm('addForm')">取 消</el-button>
-        <el-button type="primary" @click="submitForm('addForm')">确 定</el-button>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="resetForm('schoolForm')">取 消</el-button>
+        <el-button type="primary" @click="submitForm('schoolForm')">确 定</el-button>
       </div>
-      <!-- <div slot="footer" class="dialog-footer" v-if="title == '编辑学校信息'">
-        <el-button @click="resetForm('editForm')">取 消</el-button>
-        <el-button type="primary" @click="submitForm('editForm')">确 定</el-button>
-      </div> -->
     </el-dialog>
 
     <el-dialog :title="title" :visible.sync="dialogFormVisible2">
@@ -138,14 +126,9 @@ export default {
         children: "children",
         label: "label"
       },
-      addForm: {
-        name: "",
-        schoolCode: ""
-      },
-      editForm: {
-        name: "",
-        schoolCode: "",
-        id: ""
+      schoolForm: {
+        name: null,
+        schoolCode: null
       },
       editRules: {
         name: [{ required: true, message: "请输入名称", validate: validatePass, trigger: "blur" }],
@@ -259,11 +242,11 @@ export default {
       
     },
     reset() {
-      this.addForm.name = "";
-      this.addForm.schoolCode = "";
+      this.schoolForm.name = null;
+      this.schoolForm.schoolCode = null;
     },
     addData() {
-      this.resetForm(this.addForm);
+      this.reset()
       this.title = "新增学校";
       this.isAdd = true;
       if (this.selectTree != "") {
@@ -279,7 +262,7 @@ export default {
         if (valid) {
           this.dialogFormVisible = false;
           if (this.title == '新增学校') {
-            this.$axios.post('/school/manage/',this.addForm).then(res=>{
+            this.$axios.post('/school/manage/',this.schoolForm).then(res=>{
               if(res){
                 this.getAllData();
               }
@@ -288,9 +271,9 @@ export default {
           } else {
             //修改信息
             var data = {
-              name: this.editForm.name,
-              id: this.editForm.id,
-              schoolCode: this.editForm.schoolCode
+              name: this.schoolForm.name,
+              id: this.schoolForm.id,
+              schoolCode: this.schoolForm.schoolCode
             };
             this.$axios.put("/school/manage/", data).then(
               res => {
@@ -350,9 +333,9 @@ export default {
     edit(node,data){
       if(node.parent.parent == null){
         this.title = '编辑学校信息';
-        this.editForm.schoolCode = data.schoolCode;
-        this.editForm.name = data.name
-        this.editForm.id = data.id
+        this.schoolForm.schoolCode = data.schoolCode;
+        this.schoolForm.name = data.name
+        this.schoolForm.id = data.id
         this.dialogFormVisible = true;
       }
       else{
