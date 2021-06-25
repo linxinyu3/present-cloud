@@ -81,7 +81,7 @@
       </div>
     </div>
     <el-dialog :title="title" :visible.sync="dialogFormVisible">
-      <el-form :model="addForm" :rules="addRules" ref="addForm" v-if="title=='新增课程'">
+      <el-form :model="addForm" :rules="addRules" ref="addForm" >
         <el-form-item label="课程名" :label-width="formLabelWidth" prop="name">
           <el-input v-model="addForm.name" placeholder="输入课程名" autocomplete="off"></el-input>
         </el-form-item>
@@ -95,27 +95,9 @@
           <el-input v-model="addForm.description"></el-input>
         </el-form-item>
       </el-form>
-      <el-form :model="editForm" :rules="editRules" ref="editForm" v-else>
-        <el-form-item label="课程名" :label-width="formLabelWidth" prop="name">
-          <el-input v-model="editForm.name" placeholder="输入课程名" ></el-input>
-        </el-form-item>
-        <el-form-item label="课程类别" :label-width="formLabelWidth" prop="type">
-          <el-select v-model="editForm.type" placeholder="请选择课程类别">
-            <el-option label="必修" value="29"></el-option>
-            <el-option label="选修" value="30"></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="课程介绍" :label-width="formLabelWidth" prop="description">
-          <el-input v-model="editForm.description"></el-input>
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer" v-if="title=='新增课程'">
+      <div slot="footer" class="dialog-footer" >
         <el-button @click="resetForm('addForm')">取 消</el-button>
         <el-button type="primary" @click="submitForm('addForm')">确 定</el-button>
-      </div>
-      <div slot="footer" class="dialog-footer" v-else>
-        <el-button @click="resetForm('editForm')">取 消</el-button>
-        <el-button type="primary" @click="submitForm('editForm')">确 定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -136,20 +118,14 @@ export default {
       page: 1,
       data: [],
       id: 1,
-      editForm: {
-        id: "",
-        courseCode:"",
-        name: "",
-        type: "",
-        description: ""
-      },
       editRules: {
         name: [{ required: true, message: "请输入课程名", trigger: "blur" }],
         type: [{ required: true, message: "请选择课程类别", trigger: "blur" }]
       },
       addForm: {
-        name: "",
+        id: "",
         courseCode:"",
+        name: "",
         type: "",
         description: ""
       },
@@ -258,18 +234,18 @@ export default {
             );
           } else {
             //修改信息
-            if(this.editForm.type == "必修"){
-              this.editForm.type = 29
+            if(this.addForm.type == "必修"){
+              this.addForm.type = 29
             }
-            if(this.editForm.type == "选修"){
-              this.editForm.type = 30
+            if(this.addForm.type == "选修"){
+              this.addForm.type = 30
             }
             var data = {
-              id: this.editForm.id,
-              courseCode: this.editForm.courseCode,
-              name: this.editForm.name,
-              typeCode: this.editForm.type,
-              description: this.editForm.description,
+              id: this.addForm.id,
+              courseCode: this.addForm.courseCode,
+              name: this.addForm.name,
+              typeCode: this.addForm.type,
+              description: this.addForm.description,
               // enabled: true
             };
             this.$axios.put("/course/manage/", data).then(
@@ -303,11 +279,11 @@ export default {
     },
     editData(row) {
       this.title = "编辑课程信息";
-      this.editForm.id = row.id;
-      this.editForm.name = row.name;
-      this.editForm.type = row.type
-      this.editForm.courseCode = row.courseCode;
-      this.editForm.description = row.description;
+      this.addForm.id = row.id;
+      this.addForm.name = row.name;
+      this.addForm.type = row.type
+      this.addForm.courseCode = row.courseCode;
+      this.addForm.description = row.description;
       this.dialogFormVisible = true;
     }
   }

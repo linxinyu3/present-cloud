@@ -108,7 +108,8 @@ export default {
   },
   methods: {
     checkkeyword(){
-      this.$axios.get("/setting/manage/ckkwd/" + this.settingForm.keyword)
+      if(this.settingForm.keyword)
+        this.$axios.get("/setting/manage/ckkwd/" + this.settingForm.keyword)
     },
     reset() {
       this.settingForm.id = null;
