@@ -158,8 +158,9 @@ export default {
         if (index <= 0) {
           this.$message({
             message: '已经是第一条，上移失败',
-            type: 'warning'
+            type: 'error'
           });
+          return
         }else{
           // 在上一项插入该项
           this.list.splice(index - 1, 0, (this.list[index]))
@@ -170,8 +171,9 @@ export default {
         if (index === (this.list.length - 1)) {
           this.$message({
                     message: '已经是最后一条，下移失败',
-                    type: 'warning'
-                });
+                    type: 'error'
+          });
+          return
         }else{
           // 在下一项插入该项
           this.list.splice(index + 2, 0, (this.list[index]))
