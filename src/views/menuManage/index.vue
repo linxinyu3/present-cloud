@@ -79,7 +79,7 @@
           <el-input v-model="menuForm.iconCls"></el-input>
         </el-form-item>
         <el-form-item>
-          <span>图标名：https://element.eleme.cn/#/zh-CN/component/icon</span>
+          <el-link href="https://element.eleme.cn/#/zh-CN/component/icon" target="_blank" type="primary" :underline="false" style="float:left">图标名查找地址</el-link>
         </el-form-item>
         <el-form-item label="菜单状态">
           <el-radio v-model="menuForm.enabled" :label="true">启用</el-radio>
