@@ -11,14 +11,14 @@
         <el-form-item style="float:right">
           <el-button type="primary" size="small" @click="searchData()">查询</el-button>
         </el-form-item>
-        <el-form-item label="状态：" style="float:right">
+        <!-- <el-form-item label="状态：" style="float:right">
           <el-select v-model="formInline.state" placeholder="请选择状态" size="small">
             <el-option label="禁用" value="0"></el-option>
             <el-option label="启用" value="1"></el-option>
           </el-select>
-        </el-form-item>
+        </el-form-item> -->
         <el-form-item label="角色名称：" style="float:right">
-          <el-input placeholder="请输入角色名称" size="small" v-model="formInline.role"></el-input>
+          <el-input placeholder="请输入角色名称" size="small" v-model="formInline.search"></el-input>
         </el-form-item>
       </el-form>
 
@@ -42,7 +42,7 @@
             <span>{{scope.row.nameZh}}</span>
           </template>
         </el-table-column>
-        <el-table-column label="角色状态" min-width="50" align="center">
+        <!-- <el-table-column label="角色状态" min-width="50" align="center">
           <template slot-scope="scope">
             <el-button
               :type="btnState(scope.row.state)"
@@ -51,7 +51,7 @@
               size="small"
             >{{filterState(scope.row.state)}}</el-button>
           </template>
-        </el-table-column>
+        </el-table-column> -->
         <el-table-column align="center" label="操作" min-width="100">
           <template slot-scope="scope">
             <div>
@@ -81,10 +81,10 @@
         <el-form-item label="角色中文名" prop="nameZh">
           <el-input v-model="roleForm.nameZh"></el-input>
         </el-form-item>
-        <el-form-item label="角色状态" v-if="title=='编辑角色'">
+        <!-- <el-form-item label="角色状态" v-if="title=='编辑角色'">
           <el-radio v-model="roleForm.state" label="0">禁用</el-radio>
           <el-radio v-model="roleForm.state" label="1">启用</el-radio>
-        </el-form-item>
+        </el-form-item> -->
       </el-form>
       <div slot="footer" class="dialog-footer" style="text-align: center;margin-bottom:10px">
         <el-button type="primary" @click="submitForm('roleForm')" style="width:180px">确定</el-button>
@@ -155,8 +155,7 @@ export default {
       title: "新增角色",
       pageSize: 10,
       formInline: {
-        role: "",
-        state: ""
+        search: "",
       },
       page: 1
     };
@@ -177,32 +176,20 @@ export default {
       this.list = [];
       this.listLoading = true;
       this.page = 1;
-      var data = {
-        page: this.page,
-        nameZh: this.formInline.role,
-        state: this.formInline.state
-      };
-      this.$axios
-        .get(
-          "/api/role?page=" +
-            data.page +
-            "&nameZh=" +
-            data.nameZh +
-            "&state=" +
-            data.state
-        )
+      this.$axios.get("/role/manage/?search=" + this.formInline.search)
         .then(res => {
-          this.listLoading = false;
-          this.totalNum = res.data.total;
-          if (this.totalNum != 0) {
-            delete res.data[0];
-            this.list = res.data.records;
+          if(res){
+            console.log(res)
+            this.list = res
+          }else{
+            this.showRoleInfo(this.page);
+            this.formInline.search = "";
           }
-        });
+          this.listLoading = false;
+        })
     },
     resetData() {
-      this.formInline.role = "";
-      this.formInline.state = "";
+      this.formInline.search = "";
       this.showRoleInfo(this.page);
     },
     reset() {
@@ -292,7 +279,7 @@ export default {
               this.$refs[formnameZh].resetFields();
             });
           } else {
-            this.$$axios.put("//role/manage/", data).then(res => {
+            this.$axios.put("/role/manage/", data).then(res => {
               if (res) {
                 this.showRoleInfo(this.page);
               } else {
