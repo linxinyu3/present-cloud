@@ -10,6 +10,7 @@ import 'element-ui/lib/theme-chalk/index.css'
 import './css/all.css'
 import './icons'
 import axios from 'axios'
+axios.defaults.baseURL="http://www.sunago.top/dcloud";
 Vue.prototype.$axios=axios;
 // Vue.prototype.$http=axios;
 Vue.use(ElementUI);
