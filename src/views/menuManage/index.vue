@@ -79,7 +79,7 @@
           <el-input v-model="menuForm.iconCls"></el-input>
         </el-form-item>
         <el-form-item>
-          <span>图标名：https://element.eleme.cn/#/zh-CN/component/icon</span>
+          <el-link href="https://element.eleme.cn/#/zh-CN/component/icon" target="_blank" type="primary" :underline="false" style="float:left">图标名查找地址</el-link>
         </el-form-item>
         <el-form-item label="菜单状态">
           <el-radio v-model="menuForm.enabled" :label="true">启用</el-radio>
@@ -158,8 +158,9 @@ export default {
         if (index <= 0) {
           this.$message({
             message: '已经是第一条，上移失败',
-            type: 'warning'
+            type: 'error'
           });
+          return
         }else{
           // 在上一项插入该项
           this.list.splice(index - 1, 0, (this.list[index]))
@@ -170,8 +171,9 @@ export default {
         if (index === (this.list.length - 1)) {
           this.$message({
                     message: '已经是最后一条，下移失败',
-                    type: 'warning'
-                });
+                    type: 'error'
+          });
+          return
         }else{
           // 在下一项插入该项
           this.list.splice(index + 2, 0, (this.list[index]))

@@ -153,17 +153,17 @@ export default {
   methods: {
     handleClick(tab, event) {},
     //7天内登录不需要重新登录
-    confirmAutoLogin() {
-      var isLogin = JSON.parse(localStorage.getItem("isLogin")); //获取缓存看是否登录过
-      var time = localStorage.getItem("loginTime");
-      var nowTime = new Date().getTime();
-      if (
-        isLogin === true &&
-        nowTime <= time + 86400000
-      ) {
-        this.$router.push("/home");
-      }
-    },
+    // confirmAutoLogin() {
+    //   var isLogin = JSON.parse(localStorage.getItem("isLogin")); //获取缓存看是否登录过
+    //   var time = localStorage.getItem("loginTime");
+    //   var nowTime = new Date().getTime();
+    //   if (
+    //     isLogin === true &&
+    //     nowTime <= time + 86400000
+    //   ) {
+    //     this.$router.push("/home");
+    //   }
+    // },
     getValidCode() {
       var time = 60;
       this.$refs.loginForm1.validateField("username", errMsg => {

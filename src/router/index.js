@@ -14,7 +14,7 @@ import axios from 'axios'
 Vue.use(Router)
 
 export const router = new Router({
-  // mode:'history',
+  mode:'hash',
   routes: [
     { path: '/', redirect: '/login', hidden: true },
     {
@@ -87,6 +87,11 @@ router.beforeEach((to, from, next) => {
     next();
     return;
   }
+  if(from.path == '/login' && to.path == '/home'){
+    flag = false;
+    routerGoHome();
+    next()
+  }
   if(flag){
     flag = false;
     routerGo();
@@ -118,6 +123,47 @@ function menuListInit(){
 }
 
 function routerGo() {
+  menuListInit();
+  axios.get('/menu/currentUser').then(res=>{
+    if(res){
+      var data = res[0];
+      localStorage.setItem('menuList', JSON.stringify(data));
+      var menuList = JSON.parse(localStorage.getItem('menuList'));
+      menuList =  menuList.children
+      if (menuList != null) {
+        for (var i = 0; i < menuList.length; i++) {
+          // 创建路由配置
+          const Component = menuList[i].component
+          var route = {
+            path: '/',
+            component: layout,
+            redirect: '',
+            name: menuList[i].name,
+            meta: {
+              title: menuList[i].name,
+              icon: menuList[i].iconCls,
+              requireAuth: menuList[i].requireAuth
+            },
+            children: [{
+              path: menuList[i].path,
+              component: () =>
+                            import('../views/' + Component + '/index.vue'),
+              name: menuList[i].name,
+              meta: {
+                title: menuList[i].name,
+                icon: menuList[i].iconCls,
+                requireAuth: menuList[i].requireAuth
+              },
+            }]
+          }
+          router.options.routes.push(route)
+        }
+      }
+      router.addRoutes(router.options.routes)
+    }
+  })    
+}
+function routerGoHome() {
   menuListInit();
   axios.get('/menu/currentUser').then(res=>{
     if(res){
