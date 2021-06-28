@@ -12,13 +12,14 @@
           <el-button type="primary" size="small" @click="searchData()">查询</el-button>
         </el-form-item>
         <el-form-item label="状态：" style="float:right">
-          <el-select v-model="formInline.state" placeholder="请选择状态" size="small">
-            <el-option label="正常" value="0"></el-option>
-            <el-option label="禁用" value="1"></el-option>
+          <el-select v-model="formInline.enabled" placeholder="请选择状态" size="small">
+            <el-option label="正常" value="true"></el-option>
+            <el-option label="禁用" value="false"></el-option>
+            <el-option label="全部" value=""></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="用户名：" style="float:right">
-          <el-input placeholder="请输入用户名" size="small" v-model="formInline.username"></el-input>
+        <el-form-item label="用户名或角色名：" style="float:right">
+          <el-input placeholder="请输入用户名或角色名" size="small" v-model="formInline.username"></el-input>
         </el-form-item>
       </el-form>
       <el-table
@@ -39,6 +40,11 @@
           </template>
         </el-table-column>
         <el-table-column label="用户名" min-width="80" align="center">
+          <template slot-scope="scope">
+            <span>{{scope.row.username}}</span>
+          </template>
+        </el-table-column>
+                <el-table-column label="姓名" min-width="80" align="center">
           <template slot-scope="scope">
             <span>{{scope.row.name}}</span>
           </template>
@@ -101,8 +107,11 @@
         <el-form-item label="手机号" prop="phone">
           <el-input v-model="ruleForm.phone" placeholder="请输入手机号码"></el-input>
         </el-form-item>
-        <el-form-item label="用户名" prop="name">
-          <el-input v-model="ruleForm.name" placeholder="请输入用户名称"></el-input>
+        <el-form-item label="用户名" prop="username" >
+          <el-input v-model="ruleForm.username" placeholder="请输入用户名称" :disabled="title=='修改用户信息'"></el-input>
+        </el-form-item>
+        <el-form-item label="姓名" prop="name">
+          <el-input v-model="ruleForm.name" placeholder="请输入姓名"></el-input>
         </el-form-item>
         <!-- <el-form-item label="密码" prop="password" v-if="this.title == '新增用户'">
           <el-input type="password" v-model="ruleForm.password" placeholder="请输入密码" ></el-input>
@@ -110,11 +119,11 @@
         <el-form-item label="确认密码" prop="checkPass" v-if="this.title == '新增用户'" >
           <el-input type="password" v-model="ruleForm.checkPass" placeholder="请再次输入密码" ></el-input>
         </el-form-item> -->
-        <el-form-item label="性别">
+        <el-form-item label="性别" prop="sexCode">
           <el-radio v-model="ruleForm.sexCode" label="27">男</el-radio>
           <el-radio v-model="ruleForm.sexCode" label="28">女</el-radio>
         </el-form-item>
-        <el-form-item label="状态">
+        <el-form-item label="状态" prop="enabled">
           <el-radio v-model="ruleForm.enabled" :label="true">正常</el-radio>
           <el-radio v-model="ruleForm.enabled" :label="false">禁用</el-radio>
         </el-form-item>
@@ -218,6 +227,7 @@ export default {
       ruleForm: {
         phone: "",
         name: "",
+        username: "",
         password: "",
         checkPass: "",
         sexCode: "27",
@@ -233,9 +243,11 @@ export default {
       roleAu: false,
       rules: {
         phone: [{ required: true, message: "请输入手机号", trigger: "blur" }],
-        name: [{ required: true, message: "请输入用户名称", trigger: "blur" }],
+        username: [{ required: true, message: "请输入用户名", trigger: "blur" }],
+        name: [{ required: true, message: "请输入姓名", trigger: "blur" }],
         // password: [{ required: true, validator: validatePass2,trigger: "blur"}],
         // checkPass: [{ required: true, validator: validatePass3, trigger: "blur" }],
+        sexCode: [{ required: true, message: "请选择性别", trigger: "change" }],
         roleId: [{ required: true, message: "请选择角色", trigger: "change" }],
         enabled:[{ required: true, message: "请选择用户状态", trigger: "change" }],
       },
@@ -248,16 +260,26 @@ export default {
       pageSize: 10,
       formInline: {
         username: "",
+        enabled: ""
       },
-      page: 1
+      page: 1,
+      currentid:-1
     };
   },
   mounted() {
   },
   created() {
+    this.getcurrentuser()
     this.showUserInfo(this.page);
   },
   methods: {
+    getcurrentuser(){
+      this.$axios.get('/common/user/info').then(res=>{
+        if(res){
+          this.currentid = res.id
+        }
+      })
+    },
     sortByDate(obj1, obj2) {
       let val1 = obj1.roleId
       let val2 = obj2.roleId
@@ -283,19 +305,31 @@ export default {
         enabled: !row.enabled
       }
       this.listLoading = true;
-      this.$axios.put("/user/manage/", data).then(
-        res => {
-          if (res) {
-            this.showUserInfo(this.page);
+      this.$confirm("您确定要更改此用户的状态吗？若禁用将导致该用户无法登陆", "更改此用户状态", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+      .then(() => {
+        this.$axios.put("/user/manage/", data).then(
+          res => {
+            if (res) {
+              this.showUserInfo(this.page);
+              if(this.currentid == row.id){
+                this.logout()
+              }
+            }
+            this.listLoading = false;
+          },
+          res => {
+            this.$router.push({
+              path: "/" + res
+            });
           }
-          this.listLoading = false;
-        },
-        res => {
-          this.$router.push({
-            path: "/" + res
-          });
-        }
-      );
+          );
+        })
+      .catch(()=>{})
+      this.listLoading = false;
     },
     resetPass(row) {
       //重置密码
@@ -311,29 +345,32 @@ export default {
     searchData() {
       this.list = [];
       this.listLoading = true;
-      if (this.formInline.username == "") {
-        this.showUserInfo(this.page);
-      } else {
-        this.page = 1;
-        this.$axios
-          .get(
-            "/user/manage/?currentPage=" +
-              this.page +
-              "&search=" +
-              this.formInline.username
-          )
-          .then(
-            res => {
-              if(res){
-                this.listLoading = false;
-                this.totalNum = res.total;
-                if (this.totalNum != 0) {
-                  this.list = res.data;
-                }
+      this.page = 1;
+      console.log((this.formInline.enabled))
+      this.$axios
+        .get(
+          "/user/manage/?currentPage=" +
+            this.page +
+            "&search=" +
+            this.formInline.username +
+            "&enabled=" +
+            this.formInline.enabled
+        )
+        .then(
+          res => {
+            if(res){
+              console.log(res)
+              this.listLoading = false;
+              this.totalNum = res.total;
+              if (this.totalNum != 0) {
+                this.list = res.data;
               }
-            },
-          );
-      }
+            }else{
+              this.listLoading = false;
+              this.showUserInfo(this.page)
+            }
+          },
+        );
     },
     showUserInfo(page) {
       this.list = [];
@@ -343,7 +380,7 @@ export default {
       var data = {
         page: this.page
       };
-      this.$axios.get("/user/manage/?currentPage=" + this.page)
+      this.$axios.get("/user/manage/?currentPage=" + this.page +"&search=")
         .then(
           res => {
             this.listLoading = false;            
@@ -358,7 +395,8 @@ export default {
     },
     reset() {
       this.ruleForm.phone = null;
-      this.ruleForm.name = null;
+      this.ruleForm.username = null;
+      this.ruleForm.name= null;
       this.ruleForm.password = null;
       this.ruleForm.checkPass = null;
       this.ruleForm.sexCode = '27';
@@ -371,37 +409,41 @@ export default {
       this.title = "新增用户";
     },
     deleteRowData(row) {
-      if(row.roleId != 1 || row.roleId != 2){
-        this.$confirm("您确定要删除该用户吗？", "删除", {
-          confirmButtonText: "确定",
-          cancelButtonText: "取消",
-          type: "warning"
-        })
-          .then(() => {
-            this.listLoading = true;
-            var that = this;
-            this.$axios.delete("/user/manage/"  + row.id).then(
-              res => {
-                if (res) {
-                  this.page = 1;
-                  that.showUserInfo(this.page);
-                } else {
-                  this.$alert( "失败", {
-                    confirmButtonText: "确定"
-                  });
-                  that.showUserInfo(this.page);
+      this.$confirm("您确定要删除该用户吗？", "删除", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+        .then(() => {
+          this.listLoading = true;
+          var that = this;
+          this.$axios.delete("/user/manage/"  + row.id).then(
+            res => {
+              if (res) {
+                this.page = 1;
+                that.showUserInfo(this.page);
+                if(this.currentid == row.id){
+                  this.logout()
                 }
-                this.listLoading = false;
-              },
-            )
-          })
-          .catch(()=>{})
-          
-          this.listLoading = false;
-      }else{
-        this.$alert("抱歉，您没有删除管理员账户的权限")
-      }
-    
+              } else {
+                this.$alert( "失败", {
+                  confirmButtonText: "确定"
+                });
+                that.showUserInfo(this.page);
+              }
+              this.listLoading = false;
+            },
+          )
+        })
+        .catch(()=>{})
+        this.listLoading = false;
+    },
+    logout() {
+      this.$router.push({ path: "/login" });
+      localStorage.removeItem('Authorization');
+      localStorage.removeItem('isLogin');
+      localStorage.removeItem('menuList');
+      location.reload(); 
     },
     submitForm(formName) {
       this.$refs[formName].validate(valid => {
@@ -410,12 +452,13 @@ export default {
           if (this.title == "新增用户") {
             var data = {
               phone: this.ruleForm.phone,
+              username: this.ruleForm.username,
               name: this.ruleForm.name,
-              username: this.ruleForm.name,
               sexCode: this.ruleForm.sexCode,
               enabled: this.ruleForm.enabled,
               roleId: this.ruleForm.roleId,
             };
+            console.log(data)
             this.listLoading = true;
             this.$axios.post("/user/manage/", data).then(
               res => {
@@ -435,6 +478,7 @@ export default {
             var data = {
               id: this.ruleForm.id,
               phone: this.ruleForm.phone,
+              username: this.ruleForm.username,
               name: this.ruleForm.name,
               sexCode: this.ruleForm.sexCode,
               roleId: this.ruleForm.roleId,
@@ -447,11 +491,6 @@ export default {
                   this.showUserInfo(this.page);
                 }
               },
-              res => {
-                this.$router.push({
-                  path: "/" + res
-                });
-              }
             );
             this.listLoading = false;
           }
@@ -462,7 +501,7 @@ export default {
       this.dialogFormVisible = false;
       this.$refs[formName].resetFields();
       this.reset();
-      this.showUserInfo(this.page);
+      // this.showUserInfo(this.page);
     },
     submitPasswordForm(formName){
        this.$refs[formName].validate(valid => {
@@ -491,6 +530,7 @@ export default {
     },
     resetData() {
       this.formInline.username = "";
+      this.formInline.enabled = ""
       this.page = 1;
       this.showUserInfo(this.page);
     },
@@ -501,6 +541,7 @@ export default {
       // }
       this.ruleForm.id = row.id;
       this.ruleForm.phone = row.phone;
+      this.ruleForm.username = row.username;
       this.ruleForm.name = row.name;
       this.ruleForm.enabled = row.enabled;
       this.ruleForm.sexCode = row.sexCode.toString();
