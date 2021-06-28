@@ -148,9 +148,18 @@ export default {
     };
   },
   created(){
-    this.confirmAutoLogin();
+    // this.confirmAutoLogin();
+    this.logout()
   },
   methods: {
+    logout(){
+      if(localStorage.getItem("Authorization")){
+        localStorage.removeItem('Authorization');
+        localStorage.removeItem('isLogin');
+        localStorage.removeItem('menuList');
+        location.reload(); 
+      }
+    },
     handleClick(tab, event) {},
     //7天内登录不需要重新登录
     // confirmAutoLogin() {
